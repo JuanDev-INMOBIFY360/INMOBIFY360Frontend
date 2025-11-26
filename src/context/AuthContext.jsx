@@ -1,18 +1,19 @@
 import React, { createContext, useState, useEffect } from "react";
-import { jwDecode } from "jwt-decode";
+import { jwtDecode } from "jwt-decode"; // Corrección: jwtDecode, no jwDecode
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
-  const [user, setUser] = useState();
+  const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
 
   useEffect(() => {
     if (token) {
       try {
-        const decoded = jwDecode(token);
+        const decoded = jwtDecode(token);
         setUser(decoded);
       } catch (error) {
+        console.error("Error decoding token:", error);
         logout();
       }
     }
