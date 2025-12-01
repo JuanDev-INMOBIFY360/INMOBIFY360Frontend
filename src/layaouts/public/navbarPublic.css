@@ -1,10 +1,5 @@
 :root {
-  --gold: #C9A961;
-  --gold-dark: #B8984E;
-  --dark: #0F1419;
-  --white: #FFFFFF;
-  --gray: #64748B;
-  --light-gray: #F1F5F9;
+  --navbar-height: 50px; /* Variable para la altura del navbar */
   --transition: 0.26s ease;
 }
 
@@ -15,31 +10,35 @@
 }
 
 body {
-  background: var(--light-gray);
+  background: var(--color-surface);
   font-family: system-ui, -apple-system, sans-serif;
+  padding-top: var(--navbar-height); /* Compensa el espacio del navbar fixed */
 }
 
 .navbar {
-  background: var(--white);
-  height: 50px;
+  background: var(--color-bg);
+  height: var(--navbar-height);
   display: flex;
   align-items: center;
-  position: sticky;
+  position: fixed; /* Cambiado de sticky a fixed */
   top: 0;
+  left: 0; /* Asegura que empiece desde la izquierda */
+  right: 0; /* Asegura que termine en la derecha */
+  width: 100%; /* Ocupa todo el ancho */
   z-index: 1000;
-  border-bottom: 1px solid rgba(201, 169, 97, 0.15);
+  border-bottom: 1px solid rgba(234, 179, 8, 0.15);
   box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
   border-radius: 0 0 20px 20px;
 }
 
 .navbar-container {
-   width: 100%;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: space-between; 
   padding: 0 10px;
-  
 }
+
 .logo {
   display: flex;
   align-items: center;
@@ -60,6 +59,7 @@ body {
   object-fit: cover;
   object-position: center; 
 }
+
 .center-menu {
   position: absolute;
   left: 50%;
@@ -76,16 +76,13 @@ body {
 
 .faq-link {
   font-weight: bold;
-  color: var(--dark);
+  color: var(--color-text);
   text-decoration: none;
   font-size: 10px;
   transition: 0.25s;
   display: flex;
   align-items: center;
- 
 }
-
-
 
 /* --- MENU --- */
 .nav-menu {
@@ -93,7 +90,6 @@ body {
   list-style: none;
   align-items: center;
   gap: 8px;
-  
 }
 
 .nav-item {
@@ -107,20 +103,18 @@ body {
   padding: 10px 18px;
   font-weight: 500;
   font-size: 15px;
-  color: var(--dark);
+  color: var(--color-text);
   background: none;
   border: none;
   border-radius: 8px;
   cursor: pointer;
   transition: var(--transition);
-    text-decoration: none;
-
-  
+  text-decoration: none;
 }
 
 .nav-link:hover {
-  background: rgba(201, 169, 97, 0.08);
-  color: var(--gold);
+  background: rgba(234, 179, 8, 0.08);
+  color: var(--color-primary);
 }
 
 /* Arrow rotation */
@@ -135,15 +129,14 @@ body {
   left: 50%;
   transform: translateX(-50%);
   pointer-events: auto;
-
   width: 240px;
-  background: var(--white);
+  background: var(--color-bg);
   border-radius: 12px;
   padding: 10px;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  border: 1px solid rgba(201, 169, 97, 0.12);
+  border: 1px solid rgba(234, 179, 8, 0.12);
   box-shadow: 0 12px 38px rgba(0, 0, 0, 0.12);
   animation: dropdownFade 0.25s ease;
 }
@@ -167,17 +160,17 @@ body {
   text-decoration: none;
   border-radius: 8px;
   font-size: 14px;
-  color: var(--dark);
+  color: var(--color-text);
   transition: var(--transition);
 }
 
 .dropdown-item:hover {
-  background: rgba(201, 169, 97, 0.1);
+  background: rgba(234, 179, 8, 0.1);
   transform: translateX(4px);
-  color: var(--gold);
+  color: var(--color-primary);
 }
 
-/* MOBILE */
+
 @media (max-width: 900px) {
   .nav-menu {
     display: none;

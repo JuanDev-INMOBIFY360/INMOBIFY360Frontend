@@ -1,5 +1,5 @@
 import React, { createContext, useState, useEffect } from "react";
-import { jwtDecode } from "jwt-decode"; // Corrección: jwtDecode, no jwDecode
+import jwtDecode from "jwt-decode";
 
 export const AuthContext = createContext();
 
@@ -10,10 +10,15 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     if (token) {
       try {
-        const decoded = jwtDecode(token);
-        setUser(decoded);
+        let decoded = null;
+        try {
+          decoded = jwtDecode(token);
+        } catch (err) {
+          console.warn('jwt-decode failed to decode token:', err);
+        }
+        setUser(decoded || null);
       } catch (error) {
-        console.error("Error decoding token:", error);
+        console.error("Error handling token:", error);
         logout();
       }
     }

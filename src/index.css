@@ -1,0 +1,7 @@
+@import "./styles/theme.css";
+
+/* Global app-level CSS can live here. Keep component-specific styles in their own files. */
+
+/* Utility reset */
+*{ box-sizing: border-box; }
+img{ max-width:100%; display:block; }
