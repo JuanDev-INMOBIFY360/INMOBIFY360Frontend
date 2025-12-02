@@ -1,27 +1,35 @@
 import React, { createContext, useState, useEffect } from "react";
-import jwtDecode from "jwt-decode";
+import { jwtDecode } from "jwt-decode";
 
 export const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [user, setUser] = useState(null);
   const [token, setToken] = useState(localStorage.getItem("token"));
+  const [loading, setLoading] = useState(true);
+  const [permissions, setPermissions] = useState([]);
+  const [modules, setModules] = useState([]);
 
   useEffect(() => {
     if (token) {
       try {
-        let decoded = null;
-        try {
-          decoded = jwtDecode(token);
-        } catch (err) {
-          console.warn('jwt-decode failed to decode token:', err);
+        const decoded = jwtDecode(token);
+        
+        // Verificar si el token ha expirado
+        if (decoded.exp * 1000 < Date.now()) {
+          console.warn("Token expirado");
+          logout();
+        } else {
+          setUser(decoded);
+          setPermissions(decoded.permissions || []);
+          setModules(decoded.modules || []);
         }
-        setUser(decoded || null);
       } catch (error) {
-        console.error("Error handling token:", error);
+        console.error("Error decoding token:", error);
         logout();
       }
     }
+    setLoading(false);
   }, [token]);
 
   const login = (newToken) => {
@@ -33,14 +41,32 @@ export const AuthProvider = ({ children }) => {
     localStorage.removeItem("token");
     setToken(null);
     setUser(null);
+    setPermissions([]);
+    setModules([]);
   };
 
-  const isAdmin = () => {
-    return user?.role === "administrador";
+  const hasModule = (moduleName) => {
+    return modules.includes(moduleName);
+  };
+
+  const hasPermission = (moduleName, action) => {
+    const permission = permissions.find(p => p.name === moduleName);
+    if (!permission) return false;
+    return permission.privileges.some(priv => priv.action === action);
   };
 
   return (
-    <AuthContext.Provider value={{ user, token, login, logout, isAdmin }}>
+    <AuthContext.Provider value={{ 
+      user, 
+      token, 
+      login, 
+      logout, 
+      loading,
+      permissions,
+      modules,
+      hasModule,
+      hasPermission
+    }}>
       {children}
     </AuthContext.Provider>
   );

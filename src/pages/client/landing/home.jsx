@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import api from "../../../services/api";
 import "./homeStyles.css"
-import video from "../../../assets/video.mp4"
+// import video from "../../../assets"
 import PropertyList from "../properties/propertyList/PropertyList";
 import SearchBar from '../../../components/SearchBar';
 
@@ -21,7 +21,7 @@ export default function Home() {
   return (
     <>
       <header className="home-container">
-        <video
+        {/* <video
           autoPlay
           loop
           muted
@@ -29,7 +29,7 @@ export default function Home() {
           className="bg-video"
           src={video}
           aria-hidden="true"
-        />
+        /> */}
 
         <div className="overlay-home">
           <section className="home-content">
