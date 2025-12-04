@@ -68,22 +68,6 @@ body {
   gap: 10px;
 }
 
-/* Preguntas frecuentes */
-.faq-right {
-  display: flex;
-  align-items: center;
-}
-
-.faq-link {
-  font-weight: bold;
-  color: var(--color-text);
-  text-decoration: none;
-  font-size: 10px;
-  transition: 0.25s;
-  display: flex;
-  align-items: center;
-}
-
 /* --- MENU --- */
 .nav-menu {
   display: flex;

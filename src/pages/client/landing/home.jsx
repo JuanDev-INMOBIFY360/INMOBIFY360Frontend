@@ -20,7 +20,7 @@ export default function Home() {
   
   return (
     <>
-      <header className="home-container">
+      <header className="home-container home-section">
         {/* <video
           autoPlay
           loop
@@ -45,7 +45,7 @@ export default function Home() {
         </div>
       </header>
 
-      <main>
+      <main className="home-section">
         <PropertyList />
       </main>
     </>

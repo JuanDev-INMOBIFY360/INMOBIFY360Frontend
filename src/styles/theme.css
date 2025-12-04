@@ -5,27 +5,50 @@
    - Use IDs for filters in JS; colors here are defaults and can be tweaked
 */
 :root{
-  /* Brand colors */
-  --color-primary: #eab308; /* warm gold (used as primary CTA) */
-  --color-primary-600: #ca8a04;
-  --color-secondary: #b8a4d4; /* soft purple accent */
-  --color-accent: #6366f1; /* indigo used for highlights */
+  /* HOME: Brand colors matching logo - Dark gold + Teal/Turquoise */
+  --home-primary: #d4a574; /* warm gold from logo */
+  --home-primary-600: #b8860b; /* darker gold */
+  --home-secondary: #1a7f7d; /* teal from logo circle */
+  --home-accent: #0d4d4b; /* deeper teal */
+  
+  /* ADMIN: Friendly professional palette - Sky blue + Soft teal */
+  --admin-primary: #3b82f6; /* friendly sky blue */
+  --admin-primary-600: #2563eb; /* darker sky blue */
+  --admin-secondary: #06b6d4; /* cyan/soft teal */
+  --admin-accent: #0891b2; /* deeper cyan */
 
-  /* Neutrals */
-  --color-bg: #ffffff;
-  --color-surface: #f9fafb;
+  /* Shared Neutrals (adaptive based on context) */
+  --color-bg: #f9fafb; /* light neutral background */
+  --color-surface: #ffffff;
   --color-border: #e5e7eb;
   --color-muted: #6b7280;
   --color-text: #111827;
   --color-text-secondary: #374151;
 
   /* Semantic */
-  --color-success: #4caf50;
+  --color-success: #10b981;
   --color-danger: #ef4444;
+  --color-warning: #f59e0b;
 
   /* Others */
   --radius-sm: 6px;
   --shadow-sm: 0 1px 2px rgba(16,24,40,0.05);
+  --shadow-md: 0 4px 6px rgba(0,0,0,0.1);
+}
+
+/* Context-specific color assignments */
+.home-section {
+  --color-primary: var(--home-primary);
+  --color-primary-600: var(--home-primary-600);
+  --color-secondary: var(--home-secondary);
+  --color-accent: var(--home-accent);
+}
+
+.admin-section {
+  --color-primary: var(--admin-primary);
+  --color-primary-600: var(--admin-primary-600);
+  --color-secondary: var(--admin-secondary);
+  --color-accent: var(--admin-accent);
 }
 
 /* Base rules to keep app consistent */

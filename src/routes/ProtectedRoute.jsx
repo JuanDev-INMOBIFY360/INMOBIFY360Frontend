@@ -27,9 +27,18 @@ const ProtectedRoute = ({ children, requireAdmin = false, requiredModule = null 
   }
 
   // Verificar si el usuario tiene acceso al módulo específico
-  if (requiredModule && !modules.includes(requiredModule)) {
-    console.warn(`Acceso denegado: usuario no tiene permiso para el módulo '${requiredModule}'`);
-    return <Navigate to="/admin" replace />;
+  if (requiredModule) {
+    const userModulesLower = (modules || []).map((m) => (m || "").toString().toLowerCase());
+    const requiredLower = requiredModule.toString().toLowerCase();
+    // Manejo simple de plurales: 'roles' -> 'role'
+    const requiredSingular = requiredLower.endsWith("s") ? requiredLower.slice(0, -1) : requiredLower;
+
+    const hasAccess = userModulesLower.includes(requiredLower) || userModulesLower.includes(requiredSingular);
+
+    if (!hasAccess) {
+      console.warn(`Acceso denegado: usuario no tiene permiso para el módulo '${requiredModule}'`);
+      return <Navigate to="/admin" replace />;
+    }
   }
 
   return children;

@@ -22,7 +22,35 @@ export const getProperty = async (id) => {
 
 export const createProperty = async (payload) => {
     try {
-        const res = await api.post('/api/properties', payload);
+        const formData = new FormData();
+        
+        // Agregar campos normales (excluir imagenes y campos cliente-only)
+        const clientOnlyFields = ['uploadedImages', 'deletedImages', 'tempFiles', 'file'];
+        Object.keys(payload).forEach(key => {
+            if (key !== 'imagenes' && !clientOnlyFields.includes(key)) {
+                const value = payload[key];
+                // Solo agregar si tiene valor
+                if (value !== undefined && value !== null && value !== '') {
+                    formData.append(key, value);
+                }
+            }
+        });
+        
+        // Agregar imágenes (solo archivos nuevos)
+        if (payload.imagenes && payload.imagenes.length > 0) {
+            payload.imagenes.forEach((img, index) => {
+                if (img.file) {
+                    formData.append(`imagenes`, img.file);
+                }
+            });
+        }
+        
+        // Permitir que axios configure el Content-Type con boundary para multipart/form-data
+        const res = await api.post('/api/properties', formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
         return res.data;
     } catch (err) {
         console.error('❌ Error creating property:', err);
@@ -32,14 +60,42 @@ export const createProperty = async (payload) => {
 
 export const updateProperty = async (id, payload) => {
     try {
-        const res = await api.put(`/api/properties/${id}`, payload);
+        const formData = new FormData();
+        
+        // Agregar campos normales (excluir imagenes y campos cliente-only)
+        const clientOnlyFields = ['uploadedImages', 'deletedImages', 'tempFiles', 'file'];
+        Object.keys(payload).forEach(key => {
+            if (key !== 'imagenes' && !clientOnlyFields.includes(key)) {
+                const value = payload[key];
+                // Solo agregar si tiene valor
+                if (value !== undefined && value !== null && value !== '') {
+                    formData.append(key, value);
+                }
+            }
+        });
+        
+        // Agregar imágenes (solo archivos nuevos)
+        if (payload.imagenes && payload.imagenes.length > 0) {
+            payload.imagenes.forEach((img, index) => {
+                if (img.file) {
+                    formData.append(`imagenes`, img.file);
+                }
+            });
+        }
+        
+        // Permitir que axios configure el Content-Type con boundary para multipart/form-data
+        const res = await api.put(`/api/properties/${id}`, formData, {
+            headers: {
+                'Content-Type': 'multipart/form-data'
+            }
+        });
         return res.data;
     } catch (err) {
         console.error('❌ Error updating property:', err);
         throw err;
     }
 };
-
+  
 export const deleteProperty = async (id) => {
     try {
         const res = await api.delete(`/api/properties/${id}`);

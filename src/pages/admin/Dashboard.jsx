@@ -5,31 +5,12 @@ import { LogOut, Home, Users, Building, Settings } from 'lucide-react';
 export default function Dashboard() {
   const { user, logout } = useContext(AuthContext);
 
-  const handleLogout = () => {
-    if (window.confirm('¿Estás seguro de cerrar sesión?')) {
-      logout();
-    }
-  };
 
   return (
     <div className="dashboard-layout">
       
       <main className="dashboard-main">
-        <header className="dashboard-header">
-          <div className="header-content">
-            <h1>Panel de Administración</h1>
-            <div className="header-actions">
-              <div className="user-info">
-                <span className="user-name">{user?.name || user?.email}</span>
-                <span className="user-role">{user?.role}</span>
-              </div>
-              <button onClick={handleLogout} className="logout-btn">
-                <LogOut size={18} />
-                Salir
-              </button>
-            </div>
-          </div>
-        </header>
+   
 
         <div className="dashboard-content">
           <div className="stats-grid">

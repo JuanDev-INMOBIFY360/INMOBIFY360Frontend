@@ -5,11 +5,15 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import Login from "./pages/admin/auth/Login";
 import AdminLayout from "./layaouts/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
-import RolesAdmin from './pages/admin/modules/RolesAdmin';
-import OwnersAdmin from './pages/admin/modules/OwnersAdmin';
-import UsersAdmin from './pages/admin/modules/UsersAdmin';
-import PropertiesAdmin from './pages/admin/modules/PropertiesAdmin';
-import TypesAdmin from './pages/admin/modules/TypesAdmin';
+import { RolesModule } from './pages/admin/modules/Roles';
+import { UsersModule } from './pages/admin/modules/Users';
+import { OwnersModule } from './pages/admin/modules/Owners';
+import { PropertiesModule } from './pages/admin/modules/Properties';
+import { CountriesModule } from './pages/admin/modules/Countries';
+import { DepartmentsModule } from './pages/admin/modules/Departments';
+import { CitiesModule } from './pages/admin/modules/Cities';
+import { NeighborhoodsModule } from './pages/admin/modules/Neighborhoods';
+import { TypesModule } from './pages/admin/modules/Types';
 import Home from "./pages/client/landing/home";
 import PropertyDetail from "./pages/client/properties/detailsProperties/PropertyDetails";
 import PublicLayout from "./layaouts/PublicLayout";
@@ -47,7 +51,7 @@ function App() {
               path="properties" 
               element={
                 <ProtectedRoute requiredModule="property">
-                  <PropertiesAdmin />
+                  <PropertiesModule />
                 </ProtectedRoute>
               } 
             />
@@ -55,7 +59,7 @@ function App() {
               path="roles" 
               element={
                 <ProtectedRoute requiredModule="roles">
-                  <RolesAdmin />
+                  <RolesModule />
                 </ProtectedRoute>
               } 
             />
@@ -63,7 +67,40 @@ function App() {
               path="owners" 
               element={
                 <ProtectedRoute requiredModule="owner">
-                  <OwnersAdmin />
+                  <OwnersModule />
+                </ProtectedRoute>
+              } 
+            />
+      
+            <Route 
+              path="countries" 
+              element={
+                <ProtectedRoute requiredModule="country">
+                  <CountriesModule />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="departments" 
+              element={
+                <ProtectedRoute requiredModule="department">
+                  <DepartmentsModule />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="cities" 
+              element={
+                <ProtectedRoute requiredModule="city">
+                  <CitiesModule />
+                </ProtectedRoute>
+              } 
+            />
+            <Route 
+              path="neighborhoods" 
+              element={
+                <ProtectedRoute requiredModule="neighborhood">
+                  <NeighborhoodsModule />
                 </ProtectedRoute>
               } 
             />
@@ -71,15 +108,15 @@ function App() {
               path="users" 
               element={
                 <ProtectedRoute requiredModule="user">
-                  <UsersAdmin />
+                  <UsersModule />
                 </ProtectedRoute>
               } 
             />
             <Route 
               path="types" 
               element={
-                <ProtectedRoute requiredModule="tyeproperty">
-                  <TypesAdmin />
+                <ProtectedRoute requiredModule="typeproperty">
+                  <TypesModule />
                 </ProtectedRoute>
               } 
             />
