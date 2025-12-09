@@ -1,53 +1,312 @@
-/* OWNERS MODULE */
-.owners-module { padding: 2rem; background: #f8f9fa; border-radius: 8px; }
-.owners-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem; }
-.owners-header h2 { font-size: 1.75rem; color: #2c3e50; margin: 0; font-weight: 600; }
-.owners-table-container { background: white; border-radius: 8px; box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1); overflow: hidden; }
-.owners-table { width: 100%; border-collapse: collapse; }
-.owners-table thead { background: #ecf0f1; border-bottom: 2px solid #bdc3c7; }
-.owners-table th { padding: 1rem; text-align: left; font-weight: 600; color: #2c3e50; font-size: 0.9rem; text-transform: uppercase; }
-.owners-table tbody tr { border-bottom: 1px solid #ecf0f1; transition: background-color 0.3s ease; }
-.owners-table tbody tr:hover { background-color: #f8f9fa; }
-.owners-table tbody td { padding: 1rem; color: #34495e; font-size: 0.95rem; }
-.action-buttons { display: flex; gap: 0.5rem; align-items: center; }
-.action-btn { display: inline-flex; align-items: center; justify-content: center; padding: 0.5rem 0.75rem; border: none; background: transparent; cursor: pointer; border-radius: 4px; transition: all 0.3s ease; }
-.action-btn:hover { background: rgba(0, 0, 0, 0.05); }
-.action-btn--edit { color: #3498db; }
-.action-btn--edit:hover { background: rgba(52, 152, 219, 0.1); color: #2980b9; }
-.action-btn--delete { color: #e74c3c; }
-.action-btn--delete:hover { background: rgba(231, 76, 60, 0.1); color: #c0392b; }
-.action-icon { width: 18px; height: 18px; }
-.modal-overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0, 0, 0, 0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 1rem; }
-.owners-modal { background: white; border-radius: 8px; max-width: 500px; width: 100%; box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2); animation: slideUp 0.3s ease; }
-@keyframes slideUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
-.modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.5rem; border-bottom: 1px solid #ecf0f1; }
-.modal-header h3 { font-size: 1.25rem; color: #2c3e50; margin: 0; font-weight: 600; }
-.modal-close { background: transparent; border: none; cursor: pointer; color: #7f8c8d; transition: color 0.3s ease; padding: 0; display: flex; }
-.modal-close:hover { color: #2c3e50; }
-.owners-modal form { padding: 2rem 1.5rem; }
-.form-group { margin-bottom: 1.5rem; }
-.form-group label { display: block; margin-bottom: 0.5rem; font-weight: 500; color: #2c3e50; font-size: 0.95rem; }
-.form-input { width: 100%; padding: 0.75rem; border: 1px solid #bdc3c7; border-radius: 4px; font-size: 0.95rem; font-family: inherit; transition: border-color 0.3s ease; }
-.form-input:focus { outline: none; border-color: #3498db; box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1); }
-.form-input.error { border-color: #e74c3c; }
-.error-message { display: block; color: #e74c3c; font-size: 0.85rem; margin-top: 0.25rem; }
-.modal-footer { display: flex; gap: 1rem; justify-content: flex-end; padding: 1.5rem; border-top: 1px solid #ecf0f1; }
-.modal-footer .btn { padding: 0.75rem 1.5rem; font-size: 0.95rem; font-weight: 500; border: none; border-radius: 4px; cursor: pointer; transition: all 0.3s ease; }
-.btn--primary { background: linear-gradient(135deg, #3498db 0%, #2980b9 100%); color: white; }
-.btn--primary:hover:not(:disabled) { transform: translateY(-2px); box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3); }
-.btn--primary:disabled { opacity: 0.6; cursor: not-allowed; }
-.btn--secondary { background: #ecf0f1; color: #2c3e50; }
-.btn--secondary:hover:not(:disabled) { background: #bdc3c7; }
-.btn--secondary:disabled { opacity: 0.6; cursor: not-allowed; }
-.loading, .empty-state { padding: 3rem 2rem; text-align: center; color: #7f8c8d; font-size: 1rem; }
-.empty-state { color: #95a5a6; }
-.alert { padding: 1rem; border-radius: 4px; margin-bottom: 1.5rem; font-size: 0.95rem; }
-.alert--error { background: #fadbd8; color: #c0392b; border: 1px solid #f5b7b1; }
+/* OWNERS MODULE - Estilos específicos del módulo */
+.owners-module {
+  padding: 20px;
+  background: var(--color-bg);
+  border-radius: 10px;
+}
+
+.owners-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.owners-header h2 {
+  font-size: 20px;
+  color: var(--color-text);
+  margin: 0;
+  font-weight: 700;
+}
+
+.owners-table-container {
+  background: var(--color-surface);
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  overflow: hidden;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Usa los estilos genéricos de admin.css para .owners-table, thead, th, tbody, tr, td */
+.owners-table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.owners-table thead {
+  background: linear-gradient(90deg, #f3f4f6, #ffffff);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.owners-table th {
+  padding: 12px 14px;
+  text-align: left;
+  font-weight: 600;
+  font-size: 12px;
+  color: var(--color-text);
+  text-transform: uppercase;
+  letter-spacing: 0.3px;
+  white-space: nowrap;
+}
+
+.owners-table tbody tr {
+  border-bottom: 1px solid var(--color-border);
+  transition: background-color 0.15s ease;
+}
+
+.owners-table tbody tr:hover {
+  background: rgba(59, 130, 246, 0.02);
+}
+
+.owners-table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.owners-table td {
+  padding: 12px 14px;
+  color: var(--color-text);
+  font-size: 13px;
+  word-break: break-word;
+}
+
+/* ===== ACTION BUTTONS ===== */
+.action-buttons {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+
+.action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.2s ease;
+  color: var(--color-text-secondary);
+}
+
+.action-btn:hover {
+  background: rgba(0, 0, 0, 0.05);
+}
+
+.action-btn--edit {
+  color: var(--color-primary);
+}
+
+.action-btn--edit:hover {
+  background: rgba(59, 130, 246, 0.1);
+  color: var(--color-primary-600);
+}
+
+.action-btn--delete {
+  color: var(--color-danger);
+}
+
+.action-btn--delete:hover {
+  background: rgba(220, 38, 38, 0.1);
+  color: #dc2626;
+}
+
+.action-btn--view {
+  color: var(--color-secondary);
+}
+
+.action-btn--view:hover {
+  background: rgba(6, 182, 212, 0.1);
+  color: #0891b2;
+}
+
+.action-icon {
+  width: 16px;
+  height: 16px;
+}
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+  padding: 1rem;
+}
+.owners-modal {
+  background: white;
+  border-radius: 8px;
+  max-width: 500px;
+  width: 100%;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+  animation: slideUp 0.3s ease;
+}
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  border-bottom: 1px solid #ecf0f1;
+}
+.modal-header h3 {
+  font-size: 1.25rem;
+  color: #2c3e50;
+  margin: 0;
+  font-weight: 600;
+}
+.modal-close {
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  color: #7f8c8d;
+  transition: color 0.3s ease;
+  padding: 0;
+  display: flex;
+}
+.modal-close:hover {
+  color: #2c3e50;
+}
+.owners-modal form {
+  padding: 2rem 1.5rem;
+}
+.form-group {
+  margin-bottom: 1.5rem;
+}
+.form-group label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #2c3e50;
+  font-size: 0.95rem;
+}
+.form-input {
+  width: 100%;
+  padding: 0.75rem;
+  border: 1px solid #bdc3c7;
+  border-radius: 4px;
+  font-size: 0.95rem;
+  font-family: inherit;
+  transition: border-color 0.3s ease;
+}
+.form-input:focus {
+  outline: none;
+  border-color: #3498db;
+  box-shadow: 0 0 0 3px rgba(52, 152, 219, 0.1);
+}
+.form-input.error {
+  border-color: #e74c3c;
+}
+.error-message {
+  display: block;
+  color: #e74c3c;
+  font-size: 0.85rem;
+  margin-top: 0.25rem;
+}
+.modal-footer {
+  display: flex;
+  gap: 1rem;
+  justify-content: flex-end;
+  padding: 1.5rem;
+  border-top: 1px solid #ecf0f1;
+}
+.modal-footer .btn {
+  padding: 0.75rem 1.5rem;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+.btn--primary {
+  background: linear-gradient(135deg, #3498db 0%, #2980b9 100%);
+  color: white;
+}
+.btn--primary:hover:not(:disabled) {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(52, 152, 219, 0.3);
+}
+.btn--primary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.btn--secondary {
+  background: #ecf0f1;
+  color: #2c3e50;
+}
+.btn--secondary:hover:not(:disabled) {
+  background: #bdc3c7;
+}
+.btn--secondary:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+.loading,
+.empty-state {
+  padding: 3rem 2rem;
+  text-align: center;
+  color: #7f8c8d;
+  font-size: 1rem;
+}
+.empty-state {
+  color: #95a5a6;
+}
+.alert {
+  padding: 1rem;
+  border-radius: 4px;
+  margin-bottom: 1.5rem;
+  font-size: 0.95rem;
+}
+.alert--error {
+  background: #fadbd8;
+  color: #c0392b;
+  border: 1px solid #f5b7b1;
+}
 @media (max-width: 768px) {
-  .owners-module { padding: 1rem; }
-  .owners-header { flex-direction: column; align-items: flex-start; gap: 1rem; }
-  .owners-table thead { display: none; }
-  .owners-table tbody tr { display: flex; flex-direction: column; margin-bottom: 1rem; border: 1px solid #ecf0f1; border-radius: 4px; }
-  .owners-table tbody td { display: flex; justify-content: space-between; padding: 0.75rem; border: none; }
-  .owners-modal { max-width: 100%; }
+  .owners-module {
+    padding: 1rem;
+  }
+  .owners-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 1rem;
+  }
+  .owners-table thead {
+    display: none;
+  }
+  .owners-table tbody tr {
+    display: flex;
+    flex-direction: column;
+    margin-bottom: 1rem;
+    border: 1px solid #ecf0f1;
+    border-radius: 4px;
+  }
+  .owners-table tbody td {
+    display: flex;
+    justify-content: space-between;
+    padding: 0.75rem;
+    border: none;
+  }
+  .owners-modal {
+    max-width: 100%;
+  }
 }

@@ -1,4 +1,5 @@
 import { useState, useEffect } from 'react';
+import Modal from '../../../../components/Modal/';
 import '../styles/privileges.css';
 
 export default function PrivilegesForm({ item, onSave, onClose, isSubmitting }) {
@@ -37,49 +38,41 @@ export default function PrivilegesForm({ item, onSave, onClose, isSubmitting }) 
   };
 
   return (
-    <div className="privileges-modal">
-      <div className="privileges-form-container">
-        <div className="privileges-form-header">
-          <h3>{item ? 'Editar Privilegio' : 'Crear Privilegio'}</h3>
-          <button className="privileges-form-close" onClick={onClose}>×</button>
+    <form onSubmit={handleSubmit}>
+      <Modal
+        isOpen={true}
+        title={item ? 'Editar Privilegio' : 'Crear Privilegio'}
+        onClose={onClose}
+        submitButtonText={isSubmitting ? 'Guardando...' : 'Guardar'}
+        isSubmitting={isSubmitting}
+      >
+        <div className="form-group">
+          <label htmlFor="name">Nombre</label>
+          <input
+            id="name"
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            className={`form-input ${errors.name ? 'error' : ''}`}
+            placeholder="Nombre del privilegio"
+          />
+          {errors.name && <span className="error-message">{errors.name}</span>}
         </div>
-        <form onSubmit={handleSubmit} className="privileges-form">
-          <div className="privileges-form-group">
-            <label htmlFor="name">Nombre *</label>
-            <input
-              id="name"
-              type="text"
-              name="name"
-              value={formData.name}
-              onChange={handleChange}
-              className={errors.name ? 'input--error' : ''}
-              placeholder="Nombre del privilegio"
-            />
-            {errors.name && <span className="error-message">{errors.name}</span>}
-          </div>
 
-          <div className="privileges-form-group">
-            <label htmlFor="description">Descripción</label>
-            <textarea
-              id="description"
-              name="description"
-              value={formData.description}
-              onChange={handleChange}
-              placeholder="Descripción del privilegio"
-              rows="3"
-            />
-          </div>
-
-          <div className="privileges-form-actions">
-            <button type="button" className="btn btn--secondary" onClick={onClose} disabled={isSubmitting}>
-              Cancelar
-            </button>
-            <button type="submit" className="btn btn--primary" disabled={isSubmitting}>
-              {isSubmitting ? 'Guardando...' : 'Guardar'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="form-group">
+          <label htmlFor="description">Descripción</label>
+          <textarea
+            id="description"
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            placeholder="Descripción del privilegio"
+            rows="3"
+            className="form-input"
+          />
+        </div>
+      </Modal>
+    </form>
   );
 }

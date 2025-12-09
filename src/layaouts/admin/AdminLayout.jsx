@@ -59,16 +59,15 @@ const AdminLayout = () => {
     <div className="admin-root">
       <Sidebar onLogout={handleLogout} userModules={modules || []} />
       <div className="admin-main">
-        <header className="admin-topbar">
+        {/* <header className="admin-topbar">
           <div className="topbar-left">
-            <img src={logo} alt="logo" />
             <div className="panel-title">Panel administrativo</div>
           </div>
           <div className="topbar-right">
             Bienvenido&nbsp;
             <span className="user-name">{user?.name || user?.fullName || "Usuario"}</span>
           </div>
-        </header>
+        </header> */}
         <main className="admin-content">
           <Outlet />
         </main>

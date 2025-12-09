@@ -1,23 +1,37 @@
 import { useState, useEffect } from 'react';
 import { getUsers, createUser, updateUser, deleteUser } from '../../../../services/UsersService';
 import { getRoles } from '../../../../services/RolesService';
-import UsersTable from './UsersTable';
+import { useModal } from '../../../../hooks/useModal';
+import { usePagination } from '../../../../hooks/usePagination';
+import TablesModule from '../../../../components/TablesModule/';
+import Pagination from '../../../../components/Pagination';
 import UsersForm from './UsersForm';
+import { usersConfig } from './config';
+import ErrorMessage from '../../../../components/ErrorMessage';
+import LoadingSpinner from '../../../../components/Loading';
 import './styles/users.css';
 
+/**
+ * MÓDULO USERS - Patrón ESTÁNDAR HÍBRIDO MEJORADO
+ */
 export default function UsersModule() {
+  // ===== STATE =====
   const [users, setUsers] = useState([]);
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isOpen, onOpen, onClose } = useModal();
+  const pagination = usePagination(users, 10);
+  const paginatedItems = pagination.paginatedItems;
 
+  // ===== EFFECTS =====
   useEffect(() => {
     loadData();
   }, []);
 
+  // ===== HANDLERS =====
   const loadData = async () => {
     try {
       setLoading(true);
@@ -27,7 +41,7 @@ export default function UsersModule() {
       setError(null);
     } catch (err) {
       setError(err.message || 'Error cargando usuarios');
-      console.error('Error:', err);
+      console.error('❌ Error:', err);
     } finally {
       setLoading(false);
     }
@@ -35,11 +49,11 @@ export default function UsersModule() {
 
   const handleOpenModal = (user = null) => {
     setEditingUser(user);
-    setIsModalOpen(true);
+    onOpen();
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
+    onClose();
     setEditingUser(null);
   };
 
@@ -63,14 +77,14 @@ export default function UsersModule() {
       handleCloseModal();
     } catch (err) {
       setError(err.message || 'Error guardando usuario');
-      console.error('Error:', err);
+      console.error('❌ Error:', err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('¿Está seguro de que desea eliminar este usuario?')) {
+    if (!window.confirm(usersConfig.messages.delete)) {
       return;
     }
     try {
@@ -78,10 +92,25 @@ export default function UsersModule() {
       await loadData();
     } catch (err) {
       setError(err.message || 'Error eliminando usuario');
-      console.error('Error:', err);
+      console.error('❌ Error:', err);
     }
   };
 
+  // Construir columnas con datos de roles
+  const columnsWithRoles = usersConfig.columns.map(col => {
+    if (col.key === 'roleId') {
+      return {
+        ...col,
+        render: (row) => {
+          const role = roles.find(r => r.id === row.roleId);
+          return role ? role.name : 'N/A';
+        }
+      };
+    }
+    return col;
+  });
+
+  // ===== RENDER =====
   return (
     <section className="users-module">
       <div className="users-header">
@@ -91,16 +120,39 @@ export default function UsersModule() {
         </button>
       </div>
 
-      {error && <div className="alert alert--error">{error}</div>}
+      {error && (
+        <ErrorMessage 
+          message="Error en módulo Usuarios" 
+          details={error}
+          onRetry={loadData}
+          type="error"
+        />
+      )}
 
-      <UsersTable
-        users={users}
-        loading={loading}
-        onEdit={handleOpenModal}
-        onDelete={handleDelete}
-      />
+      {loading && <LoadingSpinner message="Cargando usuarios..." />}
 
-      {isModalOpen && (
+      {!loading && (
+        <>
+          <TablesModule
+            data={paginatedItems}
+            columns={columnsWithRoles}
+            onEdit={handleOpenModal}
+            onDelete={handleDelete}
+            loading={loading}
+            emptyMessage={`No hay ${usersConfig.moduleNamePlural.toLowerCase()} registrados`}
+          />
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            totalItems={users.length}
+            itemsPerPage={10}
+            onPageChange={pagination.handlePageChange}
+            isLoading={loading}
+          />
+        </>
+      )}
+
+      {isOpen && (
         <UsersForm
           user={editingUser}
           roles={roles}

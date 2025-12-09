@@ -1,16 +1,26 @@
 import { useState, useEffect } from 'react';
 import { getNeighborhoods, createNeighborhood, updateNeighborhood, deleteNeighborhood } from '../../../../services/NeighborhoodsService';
-import NeighborhoodsTable from './NeighborhoodsTable';
+import { getCities } from '../../../../services/CitiesService';
+import { useModal } from '../../../../hooks/useModal';
+import { usePagination } from '../../../../hooks/usePagination';
+import TablesModule from '../../../../components/TablesModule/';
+import Pagination from '../../../../components/Pagination';
 import NeighborhoodsForm from './NeighborhoodsForm';
+import { neighborhoodsConfig } from './config';
+import ErrorMessage from '../../../../components/ErrorMessage';
+import LoadingSpinner from '../../../../components/Loading';
 import './styles/neighborhoods.css';
 
 export default function NeighborhoodsModule() {
+  const { isOpen, onOpen, onClose } = useModal();
   const [items, setItems] = useState([]);
+  const [cities, setCities] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const pagination = usePagination(items, 10);
+  const paginatedItems = pagination.paginatedItems;
 
   useEffect(() => {
     loadData();
@@ -19,11 +29,16 @@ export default function NeighborhoodsModule() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const data = await getNeighborhoods();
-      setItems(data || []);
+      const [neighborhoodsData, citiesData] = await Promise.all([
+        getNeighborhoods(),
+        getCities()
+      ]);
+      setItems(neighborhoodsData || []);
+      setCities(citiesData || []);
       setError(null);
     } catch (err) {
       setError(err.message || 'Error cargando barrios');
+      console.error('Error:', err);
     } finally {
       setLoading(false);
     }
@@ -31,11 +46,11 @@ export default function NeighborhoodsModule() {
 
   const handleOpenModal = (item = null) => {
     setEditingItem(item);
-    setIsModalOpen(true);
+    onOpen();
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
+    onClose();
     setEditingItem(null);
   };
 
@@ -71,18 +86,41 @@ export default function NeighborhoodsModule() {
   return (
     <section className="neighborhoods-module">
       <div className="neighborhoods-header">
-        <h2>Barrios</h2>
+        <h2>{neighborhoodsConfig.moduleNamePlural}</h2>
         <button className="btn btn--primary" onClick={() => handleOpenModal()}>
-          + Crear Barrio
+          + Crear {neighborhoodsConfig.moduleName}
         </button>
       </div>
 
-      {error && <div className="alert alert--error">{error}</div>}
+      {error && <ErrorMessage message={error} />}
+      {loading && !items.length && <LoadingSpinner />}
 
-      <NeighborhoodsTable items={items} loading={loading} onEdit={handleOpenModal} onDelete={handleDelete} />
+      {!loading && (
+        <TablesModule
+          data={items}
+          columns={neighborhoodsConfig.columns.map(col => (
+            col.key === 'city' 
+              ? {
+                  ...col,
+                  render: (row) => row.city?.name || '-'
+                }
+              : col
+          ))}
+          onEdit={handleOpenModal}
+          onDelete={handleDelete}
+          loading={loading}
+          emptyMessage={neighborhoodsConfig.messages.empty}
+        />
+      )}
 
-      {isModalOpen && (
-        <NeighborhoodsForm item={editingItem} onSave={handleSave} onClose={handleCloseModal} isSubmitting={isSubmitting} />
+      {isOpen && (
+        <NeighborhoodsForm 
+          item={editingItem} 
+          onSave={handleSave} 
+          onClose={handleCloseModal} 
+          isSubmitting={isSubmitting}
+          cities={cities}
+        />
       )}
     </section>
   );

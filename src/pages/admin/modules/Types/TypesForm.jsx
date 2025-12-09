@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import Modal from '../../../../components/Modal/';
 export default function TypesForm({ item, onSave, onClose, isSubmitting }) {
   const [formData, setFormData] = useState({ name: '', description: '' });
   const [errors, setErrors] = useState({});
@@ -22,29 +22,26 @@ export default function TypesForm({ item, onSave, onClose, isSubmitting }) {
     e.preventDefault();
     if (validateForm()) onSave(formData);
   };
+
   return (
-    <div className="modal-overlay">
-      <div className="types-modal">
-        <div className="modal-header">
-          <h3>{item ? 'Editar Tipo' : 'Crear Nuevo Tipo'}</h3>
-          <button className="modal-close" onClick={onClose}><X size={20} /></button>
+    <form onSubmit={handleSubmit}>
+      <Modal
+        isOpen={true}
+        title={item ? 'Editar Tipo' : 'Crear Nuevo Tipo'}
+        onClose={onClose}
+        submitButtonText={isSubmitting ? 'Guardando...' : 'Guardar'}
+        isSubmitting={isSubmitting}
+      >
+        <div className="form-group">
+          <label htmlFor="name">Nombre del Tipo</label>
+          <input id="name" type="text" name="name" className={`form-input ${errors.name ? 'error' : ''}`} placeholder="Ej: Casa" value={formData.name} onChange={handleChange} />
+          {errors.name && <span className="error-message">{errors.name}</span>}
         </div>
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="name">Nombre del Tipo</label>
-            <input id="name" type="text" name="name" className={`form-input ${errors.name ? 'error' : ''}`} placeholder="Ej: Casa" value={formData.name} onChange={handleChange} />
-            {errors.name && <span className="error-message">{errors.name}</span>}
-          </div>
-          <div className="form-group">
-            <label htmlFor="description">Descripción</label>
-            <textarea name="description" id="description" className="form-input" placeholder="Descripción opcional" rows="3" value={formData.description} onChange={handleChange} />
-          </div>
-          <div className="modal-footer">
-            <button type="button" className="btn btn--secondary" onClick={onClose} disabled={isSubmitting}>Cancelar</button>
-            <button type="submit" className="btn btn--primary" disabled={isSubmitting}>{isSubmitting ? 'Guardando...' : 'Guardar'}</button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="form-group">
+          <label htmlFor="description">Descripción</label>
+          <textarea name="description" id="description" className="form-input" placeholder="Descripción opcional" rows="3" value={formData.description} onChange={handleChange} />
+        </div>
+      </Modal>
+    </form>
   );
 }

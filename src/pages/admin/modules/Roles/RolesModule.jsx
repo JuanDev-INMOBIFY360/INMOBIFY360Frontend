@@ -1,30 +1,55 @@
-import { useState, useEffect } from 'react';
-import { getRoles, createRole, updateRole, deleteRole } from '../../../../services/RolesService';
-import RolesTable from './RolesTable';
-import RolesForm from './RolesForm';
-import './styles/roles.css';
+import { useState, useEffect } from "react";
+import {
+  getRoles,
+  createRole,
+  updateRole,
+  deleteRole,
+} from "../../../../services/RolesService";
+import { useModal } from "../../../../hooks/useModal";
+import { usePagination } from "../../../../hooks/usePagination";
+import TablesModule from "../../../../components/TablesModule/";
+import Pagination from "../../../../components/Pagination";
+import RolesForm from "./RolesForm";
+import { rolesConfig } from "./config";
+import ErrorMessage from "../../../../components/ErrorMessage";
+import LoadingSpinner from "../../../../components/Loading";
+import "./styles/roles.css";
 
+/**
+ * MÓDULO ROLES - Patrón ESTÁNDAR HÍBRIDO MEJORADO
+ * 
+ * Estructura:
+ * 1. State - Datos y UI
+ * 2. Effects - Cargar datos al montar
+ * 3. Handlers - CRUD operations
+ * 4. Render - UI
+ */
 export default function RolesModule() {
+  // ===== STATE =====
   const [roles, setRoles] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingRole, setEditingRole] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const { isOpen, onOpen, onClose } = useModal();
+  const pagination = usePagination(roles, 10);
+  const paginatedItems = pagination.paginatedItems;
 
+  // ===== EFFECTS =====
   useEffect(() => {
     loadRoles();
   }, []);
 
+  // ===== HANDLERS =====
   const loadRoles = async () => {
     try {
       setLoading(true);
-      const data = await getRoles(); // Asegúrate de usar getRoles
+      const data = await getRoles();
       setRoles(data || []);
       setError(null);
     } catch (err) {
-      setError(err.message || 'Error cargando roles');
-      console.error('Error:', err);
+      setError(err.message || "Error cargando roles");
+      console.error("❌ Error:", err);
     } finally {
       setLoading(false);
     }
@@ -32,11 +57,11 @@ export default function RolesModule() {
 
   const handleOpenModal = (role = null) => {
     setEditingRole(role);
-    setIsModalOpen(true);
+    onOpen();
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
+    onClose();
     setEditingRole(null);
   };
 
@@ -44,37 +69,37 @@ export default function RolesModule() {
     try {
       setIsSubmitting(true);
       if (editingRole) {
-        // Actualizar rol
-        await updateRole(editingRole.id, payload);  // Usa updateRole
+        await updateRole(editingRole.id, payload);
       } else {
-        // Crear nuevo rol
-        await createRole(payload);  // Usa createRole
+        await createRole(payload);
       }
       await loadRoles();
       handleCloseModal();
     } catch (err) {
-      setError(err.message || 'Error guardando rol');
-      console.error('Error:', err);
+      setError(err.message || "Error guardando rol");
+      console.error("❌ Error:", err);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('¿Está seguro de que desea eliminar este rol?')) {
+    if (!window.confirm(rolesConfig.messages.delete)) {
       return;
     }
     try {
-      await deleteRole(id);  // Usa deleteRole
+      await deleteRole(id);
       await loadRoles();
     } catch (err) {
-      setError(err.message || 'Error eliminando rol');
-      console.error('Error:', err);
+      setError(err.message || "Error eliminando rol");
+      console.error("❌ Error:", err);
     }
   };
 
+  // ===== RENDER =====
   return (
     <section className="roles-module">
+      {/* HEADER */}
       <div className="roles-header">
         <h2>Roles</h2>
         <button className="btn btn--primary" onClick={() => handleOpenModal()}>
@@ -82,16 +107,43 @@ export default function RolesModule() {
         </button>
       </div>
 
-      {error && <div className="alert alert--error">{error}</div>}
+      {/* ERROR MESSAGE */}
+      {error && (
+        <ErrorMessage
+          message="Error en módulo Roles"
+          details={error}
+          onRetry={loadRoles}
+          type="error"
+        />
+      )}
 
-      <RolesTable
-        roles={roles}
-        loading={loading}
-        onEdit={handleOpenModal}
-        onDelete={handleDelete}
-      />
+      {/* LOADING */}
+      {loading && <LoadingSpinner message="Cargando roles..." />}
 
-      {isModalOpen && (
+      {/* TABLA */}
+      {!loading && (
+        <>
+          <TablesModule
+            data={paginatedItems}
+            columns={rolesConfig.columns}
+            onEdit={handleOpenModal}
+            onDelete={handleDelete}
+            loading={loading}
+            emptyMessage={`No hay ${rolesConfig.moduleNamePlural.toLowerCase()} registrados`}
+          />
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            totalItems={roles.length}
+            itemsPerPage={10}
+            onPageChange={pagination.handlePageChange}
+            isLoading={loading}
+          />
+        </>
+      )}
+
+      {/* MODAL CON FORM */}
+      {isOpen && (
         <RolesForm
           role={editingRole}
           onSave={handleSave}

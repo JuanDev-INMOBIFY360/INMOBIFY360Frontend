@@ -1,14 +1,23 @@
-import { useState, useEffect } from 'react';
-import { getOwners, createOwner, updateOwner, deleteOwner } from '../../../../services/OwnersService';
-import OwnersTable from './OwnersTable';
-import OwnersForm from './OwnersForm';
-import './styles/owners.css';
+import { useState, useEffect } from "react";
+import {
+  getOwners,
+  createOwner,
+  updateOwner,
+  deleteOwner,
+} from "../../../../services/OwnersService";
+import { useModal } from "../../../../hooks/useModal";
+import TablesModule from "../../../../components/TablesModule/";
+import OwnersForm from "./OwnersForm";
+import { ownersConfig } from "./config";
+import ErrorMessage from "../../../../components/ErrorMessage";
+import LoadingSpinner from "../../../../components/Loading";
+import "./styles/owners.css";
 
 export default function OwnersModule() {
+  const { isOpen, onOpen, onClose } = useModal();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -23,7 +32,7 @@ export default function OwnersModule() {
       setItems(data || []);
       setError(null);
     } catch (err) {
-      setError(err.message || 'Error cargando propietarios');
+      setError(err.message || "Error cargando propietarios");
     } finally {
       setLoading(false);
     }
@@ -31,11 +40,11 @@ export default function OwnersModule() {
 
   const handleOpenModal = (item = null) => {
     setEditingItem(item);
-    setIsModalOpen(true);
+    onOpen();
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
+    onClose();
     setEditingItem(null);
   };
 
@@ -50,39 +59,56 @@ export default function OwnersModule() {
       await loadData();
       handleCloseModal();
     } catch (err) {
-      setError(err.message || 'Error guardando propietario');
+      setError(err.message || "Error guardando propietario");
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (!window.confirm('¿Está seguro de que desea eliminar este propietario?')) {
+    if (
+      !window.confirm("¿Está seguro de que desea eliminar este propietario?")
+    ) {
       return;
     }
     try {
       await deleteOwner(id);
       await loadData();
     } catch (err) {
-      setError(err.message || 'Error eliminando propietario');
+      setError(err.message || "Error eliminando propietario");
     }
   };
 
   return (
     <section className="owners-module">
       <div className="owners-header">
-        <h2>Propietarios</h2>
+        <h2>{ownersConfig.moduleNamePlural}</h2>
         <button className="btn btn--primary" onClick={() => handleOpenModal()}>
-          + Crear Propietario
+          + Crear {ownersConfig.moduleName}
         </button>
       </div>
 
-      {error && <div className="alert alert--error">{error}</div>}
+      {error && <ErrorMessage message={error} />}
+      {loading && !items.length && <LoadingSpinner />}
 
-      <OwnersTable items={items} loading={loading} onEdit={handleOpenModal} onDelete={handleDelete} />
+      {!loading && (
+        <TablesModule
+          data={items}
+          columns={ownersConfig.columns}
+          onEdit={handleOpenModal}
+          onDelete={handleDelete}
+          loading={loading}
+          emptyMessage={ownersConfig.messages.empty}
+        />
+      )}
 
-      {isModalOpen && (
-        <OwnersForm item={editingItem} onSave={handleSave} onClose={handleCloseModal} isSubmitting={isSubmitting} />
+      {isOpen && (
+        <OwnersForm
+          item={editingItem}
+          onSave={handleSave}
+          onClose={handleCloseModal}
+          isSubmitting={isSubmitting}
+        />
       )}
     </section>
   );

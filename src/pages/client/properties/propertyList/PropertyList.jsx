@@ -18,7 +18,6 @@ const PropertyCarousel = () => {
       .then((data) => {
         console.log("✅ Propiedades recibidas:", data);
         
-        // Transformar datos de la API al formato del componente
         const transformedProperties = data.map(prop => ({
           id: prop.id,
           precio: prop.precio,
@@ -27,7 +26,6 @@ const PropertyCarousel = () => {
           banos: prop.banos || 0,
           parqueaderos: prop.parqueaderos || 0,
           direccion: prop.direccion || 'Dirección no disponible',
-          // Guardamos nombre legible y también los ids para búsquedas consistentes
           ciudad: `${prop.city?.name || ''}, ${prop.department?.name || ''}`.trim() || 'Ciudad no disponible',
           cityId: prop.city?.id ?? prop.cityId ?? null,
           departmentId: prop.department?.id ?? prop.departmentId ?? null,
@@ -212,21 +210,7 @@ const PropertyCarousel = () => {
             <ChevronRight aria-hidden="true" />
           </button>
         </div>
-
-        {/* Indicadores */}
-        <nav className="carousel-indicators" aria-label="Páginas del carrusel">
-          {Array.from({ length: maxIndex + 1 }).map((_, idx) => (
-            <button
-              key={idx}
-              onClick={() => setCurrentIndex(idx)}
-              className={`carousel-indicator ${idx === currentIndex ? 'carousel-indicator--active' : ''}`}
-              aria-current={idx === currentIndex ? 'page' : 'false'}
-              aria-label={`Ir a página ${idx + 1}`}
-            />
-          ))}
-        </nav>
-
-        {/* CTA */}
+      
         <div className="carousel-cta">
           <button className="carousel-cta-btn" onClick={() => navigate('/search')} aria-label="Ver todas las propiedades disponibles">Ver Todas las Propiedades</button>
         </div>

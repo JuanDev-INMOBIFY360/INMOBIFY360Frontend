@@ -2,7 +2,7 @@ import React from 'react';
 import { X } from 'lucide-react';
 import './modal.css';
 
-export default function Modal({ isOpen, title, children, onClose, onSubmit, submitText = 'Guardar', isLoading = false, size = 'normal' }) {
+export default function Modal({ isOpen, title, children, onClose, submitButtonText = 'Guardar', isSubmitting = false, size = 'normal' }) {
   if (!isOpen) return null;
 
   const modalClass = size === 'lg' ? 'modal-lg' : '';
@@ -12,21 +12,21 @@ export default function Modal({ isOpen, title, children, onClose, onSubmit, subm
       <div className={`modal-content ${modalClass}`} onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <h2>{title}</h2>
-          <button className="modal-close" onClick={onClose}>
+          <button className="modal-close" onClick={onClose} type="button">
             <X size={24} />
           </button>
         </div>
-        <form onSubmit={onSubmit} className="modal-body">
+        <div className="modal-body">
           {children}
           <div className="modal-footer">
-            <button type="button" className="btn btn-secondary" onClick={onClose}>
+            <button type="button" className="btn btn--secondary" onClick={onClose} disabled={isSubmitting}>
               Cancelar
             </button>
-            <button type="submit" className="btn" disabled={isLoading}>
-              {isLoading ? 'Guardando...' : submitText}
+            <button type="submit" className="btn btn--primary" disabled={isSubmitting}>
+              {isSubmitting ? 'Guardando...' : submitButtonText}
             </button>
           </div>
-        </form>
+        </div>
       </div>
     </div>
   );

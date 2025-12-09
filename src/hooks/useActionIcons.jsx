@@ -8,7 +8,7 @@ import { Trash2, Edit3, Eye, Plus } from 'lucide-react';
  */
 export const useActionIcons = () => {
   const iconConfig = {
-    size: 18,
+    size: 16,
     className: 'action-icon'
   };
 

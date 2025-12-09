@@ -1,16 +1,26 @@
 import { useState, useEffect } from 'react';
 import { getDepartments, createDepartment, updateDepartment, deleteDepartment } from '../../../../services/DepartamentsService';
-import DepartmentsTable from './DepartmentsTable';
+import { getCountries } from '../../../../services/CountriesService';
+import { useModal } from '../../../../hooks/useModal';
+import { usePagination } from '../../../../hooks/usePagination';
+import TablesModule from '../../../../components/TablesModule/';
+import Pagination from '../../../../components/Pagination';
 import DepartmentsForm from './DepartmentsForm';
+import { departmentsConfig } from './config';
+import ErrorMessage from '../../../../components/ErrorMessage';
+import LoadingSpinner from '../../../../components/Loading';
 import './styles/departments.css';
 
 export default function DepartmentsModule() {
+  const { isOpen, onOpen, onClose } = useModal();
   const [items, setItems] = useState([]);
+  const [countries, setCountries] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const pagination = usePagination(items, 10);
+  const paginatedItems = pagination.paginatedItems;
 
   useEffect(() => {
     loadData();
@@ -19,8 +29,12 @@ export default function DepartmentsModule() {
   const loadData = async () => {
     try {
       setLoading(true);
-      const data = await getDepartments();
-      setItems(data || []);
+      const [departmentsData, countriesData] = await Promise.all([
+        getDepartments(),
+        getCountries()
+      ]);
+      setItems(departmentsData || []);
+      setCountries(countriesData || []);
       setError(null);
     } catch (err) {
       setError(err.message || 'Error cargando departamentos');
@@ -32,11 +46,11 @@ export default function DepartmentsModule() {
 
   const handleOpenModal = (item = null) => {
     setEditingItem(item);
-    setIsModalOpen(true);
+    onOpen();
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
+    onClose();
     setEditingItem(null);
   };
 
@@ -74,27 +88,50 @@ export default function DepartmentsModule() {
   return (
     <section className="departments-module">
       <div className="departments-header">
-        <h2>Departamentos</h2>
+        <h2>{departmentsConfig.moduleNamePlural}</h2>
         <button className="btn btn--primary" onClick={() => handleOpenModal()}>
-          + Crear Departamento
+          + Crear {departmentsConfig.moduleName}
         </button>
       </div>
 
-      {error && <div className="alert alert--error">{error}</div>}
+      {error && <ErrorMessage message={error} />}
+      {loading && !items.length && <LoadingSpinner />}
 
-      <DepartmentsTable
-        items={items}
-        loading={loading}
-        onEdit={handleOpenModal}
-        onDelete={handleDelete}
-      />
+      {!loading && (
+        <>
+          <TablesModule
+            data={paginatedItems}
+            columns={departmentsConfig.columns.map(col => (
+              col.key === 'country' 
+                ? {
+                    ...col,
+                    render: (row) => row.country?.name || '-'
+                  }
+                : col
+            ))}
+            onEdit={handleOpenModal}
+            onDelete={handleDelete}
+            loading={loading}
+            emptyMessage={departmentsConfig.messages.empty}
+          />
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            totalItems={items.length}
+            itemsPerPage={10}
+            onPageChange={pagination.handlePageChange}
+            isLoading={loading}
+          />
+        </>
+      )}
 
-      {isModalOpen && (
+      {isOpen && (
         <DepartmentsForm
           item={editingItem}
           onSave={handleSave}
           onClose={handleCloseModal}
           isSubmitting={isSubmitting}
+          countries={countries}
         />
       )}
     </section>

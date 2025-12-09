@@ -1,5 +1,5 @@
 import React, { useEffect } from 'react';
-import { attachImageMetadata, getSignature } from '../services/cloudinaryService';
+import { attachImageMetadata, getSignature } from '../../services/cloudinaryService';
 
 // Widget component (unsigned preset) — requires you to create an unsigned upload preset in Cloudinary
 // and set VITE_CLOUDINARY_UPLOAD_PRESET and VITE_CLOUDINARY_CLOUD_NAME in the frontend env (.env).

@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
 import { getTypes, createType, updateType, deleteType } from '../../../../services/TypesService';
-import TypesTable from './TypesTable';
+import { useModal } from '../../../../hooks/useModal';
+import TablesModule from '../../../../components/TablesModule/';
 import TypesForm from './TypesForm';
+import { typesConfig } from './config';
+import ErrorMessage from '../../../../components/ErrorMessage';
+import LoadingSpinner from '../../../../components/Loading';
 import './styles/types.css';
 
 export default function TypesModule() {
+  const { isOpen, onOpen, onClose } = useModal();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -31,11 +35,11 @@ export default function TypesModule() {
 
   const handleOpenModal = (item = null) => {
     setEditingItem(item);
-    setIsModalOpen(true);
+    onOpen();
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
+    onClose();
     setEditingItem(null);
   };
 
@@ -71,18 +75,33 @@ export default function TypesModule() {
   return (
     <section className="types-module">
       <div className="types-header">
-        <h2>Tipos de Propiedad</h2>
+        <h2>{typesConfig.moduleNamePlural}</h2>
         <button className="btn btn--primary" onClick={() => handleOpenModal()}>
-          + Crear Tipo
+          + Crear {typesConfig.moduleName}
         </button>
       </div>
 
-      {error && <div className="alert alert--error">{error}</div>}
+      {error && <ErrorMessage message={error} />}
+      {loading && !items.length && <LoadingSpinner />}
 
-      <TypesTable items={items} loading={loading} onEdit={handleOpenModal} onDelete={handleDelete} />
+      {!loading && (
+        <TablesModule
+          data={items}
+          columns={typesConfig.columns}
+          onEdit={handleOpenModal}
+          onDelete={handleDelete}
+          loading={loading}
+          emptyMessage={typesConfig.messages.empty}
+        />
+      )}
 
-      {isModalOpen && (
-        <TypesForm item={editingItem} onSave={handleSave} onClose={handleCloseModal} isSubmitting={isSubmitting} />
+      {isOpen && (
+        <TypesForm 
+          item={editingItem} 
+          onSave={handleSave} 
+          onClose={handleCloseModal} 
+          isSubmitting={isSubmitting} 
+        />
       )}
     </section>
   );

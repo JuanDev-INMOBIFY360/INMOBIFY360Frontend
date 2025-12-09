@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { X } from 'lucide-react';
+import Modal from '../../../../components/Modal/';
 
 export default function UsersForm({ user, roles, onSave, onClose, isSubmitting }) {
   const [formData, setFormData] = useState({
@@ -81,98 +81,77 @@ export default function UsersForm({ user, roles, onSave, onClose, isSubmitting }
   };
 
   return (
-    <div className="modal-overlay">
-      <div className="users-modal">
-        <div className="modal-header">
-          <h3>{user ? 'Editar Usuario' : 'Crear Nuevo Usuario'}</h3>
-          <button className="modal-close" onClick={onClose}>
-            <X size={20} />
-          </button>
+    <form onSubmit={handleSubmit}>
+      <Modal
+        isOpen={true}
+        title={user ? 'Editar Usuario' : 'Crear Nuevo Usuario'}
+        onClose={onClose}
+        submitButtonText={isSubmitting ? 'Guardando...' : 'Guardar'}
+        isSubmitting={isSubmitting}
+      >
+        <div className="form-group">
+          <label htmlFor="name">Nombre Completo</label>
+          <input
+            id="name"
+            type="text"
+            name="name"
+            className={`form-input ${errors.name ? 'error' : ''}`}
+            placeholder="Ej: Juan Pérez"
+            value={formData.name}
+            onChange={handleChange}
+          />
+          {errors.name && <span className="error-message">{errors.name}</span>}
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <div className="form-group">
-            <label htmlFor="name">Nombre Completo</label>
-            <input
-              id="name"
-              type="text"
-              name="name"
-              className={`form-input ${errors.name ? 'error' : ''}`}
-              placeholder="Ej: Juan Pérez"
-              value={formData.name}
-              onChange={handleChange}
-            />
-            {errors.name && <span className="error-message">{errors.name}</span>}
-          </div>
+        <div className="form-group">
+          <label htmlFor="email">Email</label>
+          <input
+            id="email"
+            type="email"
+            name="email"
+            className={`form-input ${errors.email ? 'error' : ''}`}
+            placeholder="usuario@example.com"
+            value={formData.email}
+            onChange={handleChange}
+          />
+          {errors.email && <span className="error-message">{errors.email}</span>}
+        </div>
 
-          <div className="form-group">
-            <label htmlFor="email">Email</label>
-            <input
-              id="email"
-              type="email"
-              name="email"
-              className={`form-input ${errors.email ? 'error' : ''}`}
-              placeholder="usuario@example.com"
-              value={formData.email}
-              onChange={handleChange}
-            />
-            {errors.email && <span className="error-message">{errors.email}</span>}
-          </div>
+        <div className="form-group">
+          <label htmlFor="roleId">Rol</label>
+          <select
+            id="roleId"
+            name="roleId"
+            className={`form-select ${errors.roleId ? 'error' : ''}`}
+            value={formData.roleId}
+            onChange={handleChange}
+          >
+            <option value="">Seleccionar rol</option>
+            {roles.map((role) => (
+              <option key={role.id} value={role.id}>
+                {role.name}
+              </option>
+            ))}
+          </select>
+          {errors.roleId && <span className="error-message">{errors.roleId}</span>}
+        </div>
 
-          <div className="form-group">
-            <label htmlFor="roleId">Rol</label>
-            <select
-              id="roleId"
-              name="roleId"
-              className={`form-select ${errors.roleId ? 'error' : ''}`}
-              value={formData.roleId}
-              onChange={handleChange}
-            >
-              <option value="">Seleccionar rol</option>
-              {roles.map((role) => (
-                <option key={role.id} value={role.id}>
-                  {role.name}
-                </option>
-              ))}
-            </select>
-            {errors.roleId && <span className="error-message">{errors.roleId}</span>}
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password">
-              Contraseña {user && '(dejar en blanco para no cambiar)'}
-            </label>
-            <input
-              id="password"
-              type="password"
-              name="password"
-              className={`form-input ${errors.password ? 'error' : ''}`}
-              placeholder="••••••••"
-              value={formData.password}
-              onChange={handleChange}
-            />
-            {errors.password && <span className="error-message">{errors.password}</span>}
-          </div>
-
-          <div className="modal-footer">
-            <button
-              type="button"
-              className="btn btn--secondary"
-              onClick={onClose}
-              disabled={isSubmitting}
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              className="btn btn--primary"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? 'Guardando...' : 'Guardar'}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
+        <div className="form-group">
+          <label htmlFor="password">
+            Contraseña {user && '(dejar en blanco para no cambiar)'}
+          </label>
+          <input
+            id="password"
+            type="password"
+            name="password"
+            className={`form-input ${errors.password ? 'error' : ''}`}
+            placeholder="••••••••"
+            value={formData.password}
+            onChange={handleChange}
+          />
+          {errors.password && <span className="error-message">{errors.password}</span>}
+        </div>
+      </Modal>
+    </form>
   );
 }

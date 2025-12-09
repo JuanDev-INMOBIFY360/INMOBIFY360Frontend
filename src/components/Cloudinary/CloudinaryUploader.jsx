@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getSignature, uploadToCloudinary, attachImageMetadata } from '../services/cloudinaryService';
+import { getSignature, uploadToCloudinary, attachImageMetadata } from '../../services/cloudinaryService';
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];

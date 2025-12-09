@@ -1,16 +1,24 @@
 import { useState, useEffect } from 'react';
 import { getCountries, createCountry, updateCountry, deleteCountry } from '../../../../services/CountriesService';
-import CountriesTable from './CountriesTable';
+import { useModal } from '../../../../hooks/useModal';
+import { usePagination } from '../../../../hooks/usePagination';
+import TablesModule from '../../../../components/TablesModule/';
+import Pagination from '../../../../components/Pagination';
 import CountriesForm from './CountriesForm';
+import { countriesConfig } from './config';
+import ErrorMessage from '../../../../components/ErrorMessage';
+import LoadingSpinner from '../../../../components/Loading';
 import './styles/countries.css';
 
 export default function CountriesModule() {
+  const { isOpen, onOpen, onClose } = useModal();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const pagination = usePagination(items, 10);
+  const paginatedItems = pagination.paginatedItems;
 
   useEffect(() => {
     loadData();
@@ -32,11 +40,11 @@ export default function CountriesModule() {
 
   const handleOpenModal = (item = null) => {
     setEditingItem(item);
-    setIsModalOpen(true);
+    onOpen();
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
+    onClose();
     setEditingItem(null);
   };
 
@@ -74,22 +82,37 @@ export default function CountriesModule() {
   return (
     <section className="countries-module">
       <div className="countries-header">
-        <h2>Países</h2>
+        <h2>{countriesConfig.moduleNamePlural}</h2>
         <button className="btn btn--primary" onClick={() => handleOpenModal()}>
-          + Crear País
+          + Crear {countriesConfig.moduleName}
         </button>
       </div>
 
-      {error && <div className="alert alert--error">{error}</div>}
+      {error && <ErrorMessage message={error} />}
+      {loading && !items.length && <LoadingSpinner />}
 
-      <CountriesTable
-        items={items}
-        loading={loading}
-        onEdit={handleOpenModal}
-        onDelete={handleDelete}
-      />
+      {!loading && (
+        <>
+          <TablesModule
+            data={paginatedItems}
+            columns={countriesConfig.columns}
+            onEdit={handleOpenModal}
+            onDelete={handleDelete}
+            loading={loading}
+            emptyMessage={countriesConfig.messages.empty}
+          />
+          <Pagination
+            currentPage={pagination.currentPage}
+            totalPages={pagination.totalPages}
+            totalItems={items.length}
+            itemsPerPage={10}
+            onPageChange={pagination.handlePageChange}
+            isLoading={loading}
+          />
+        </>
+      )}
 
-      {isModalOpen && (
+      {isOpen && (
         <CountriesForm
           item={editingItem}
           onSave={handleSave}

@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
-import { getPrivileges, createPrivilege, updatePrivilege, deletePrivilege } from '../../../services/PrivilegesService';
-import PrivilegesTable from './PrivilegesTable';
+import { getPrivileges, createPrivilege, updatePrivilege, deletePrivilege } from '../../../../services/PrivilegesService';
+import { useModal } from '../../../../hooks/useModal';
+import TablesModule from '../../../../components/TablesModule/';
 import PrivilegesForm from './PrivilegesForm';
+import { privilegesConfig } from './config';
+import ErrorMessage from '../../../../components/ErrorMessage';
+import LoadingSpinner from '../../../../components/Loading';
 import './styles/privileges.css';
 
 export default function PrivilegesModule() {
+  const { isOpen, onOpen, onClose } = useModal();
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
-  const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -31,11 +35,11 @@ export default function PrivilegesModule() {
 
   const handleOpenModal = (item = null) => {
     setEditingItem(item);
-    setIsModalOpen(true);
+    onOpen();
   };
 
   const handleCloseModal = () => {
-    setIsModalOpen(false);
+    onClose();
     setEditingItem(null);
   };
 
@@ -71,18 +75,33 @@ export default function PrivilegesModule() {
   return (
     <section className="privileges-module">
       <div className="privileges-header">
-        <h2>Privilegios</h2>
+        <h2>{privilegesConfig.moduleNamePlural}</h2>
         <button className="btn btn--primary" onClick={() => handleOpenModal()}>
-          + Crear Privilegio
+          + Crear {privilegesConfig.moduleName}
         </button>
       </div>
 
-      {error && <div className="alert alert--error">{error}</div>}
+      {error && <ErrorMessage message={error} />}
+      {loading && !items.length && <LoadingSpinner />}
 
-      <PrivilegesTable items={items} loading={loading} onEdit={handleOpenModal} onDelete={handleDelete} />
+      {!loading && (
+        <TablesModule
+          data={items}
+          columns={privilegesConfig.columns}
+          onEdit={handleOpenModal}
+          onDelete={handleDelete}
+          loading={loading}
+          emptyMessage={privilegesConfig.messages.empty}
+        />
+      )}
 
-      {isModalOpen && (
-        <PrivilegesForm item={editingItem} onSave={handleSave} onClose={handleCloseModal} isSubmitting={isSubmitting} />
+      {isOpen && (
+        <PrivilegesForm 
+          item={editingItem} 
+          onSave={handleSave} 
+          onClose={handleCloseModal} 
+          isSubmitting={isSubmitting} 
+        />
       )}
     </section>
   );

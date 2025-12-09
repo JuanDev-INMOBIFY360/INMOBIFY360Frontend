@@ -3,7 +3,7 @@ import api from "../../../services/api";
 import "./homeStyles.css"
 // import video from "../../../assets"
 import PropertyList from "../properties/propertyList/PropertyList";
-import SearchBar from '../../../components/SearchBar';
+import SearchBar from '../../../components/SearchBar/';
 
 export default function Home() {
   const [query, setQuery] = useState("");
