@@ -6,18 +6,19 @@ import { getCities } from '../../../../services/CitiesService';
 import { getNeighborhoods } from '../../../../services/NeighborhoodsService';
 import { getTypes } from '../../../../services/TypesService';
 import { getOwners } from '../../../../services/OwnersService';
-import { useModal } from '../../../../hooks/useModal';
-import { usePagination } from '../../../../hooks/usePagination';
 import PropertiesStepsForm from './PropertiesStepsForm';
 import { propertiesConfig } from './config';
 import ErrorMessage from '../../../../components/ErrorMessage';
 import LoadingSpinner from '../../../../components/Loading';
 import Pagination from '../../../../components/Pagination';
-import { Edit2, Trash2, MapPin, Bed, Bath, Car, Maximize } from 'lucide-react';
+import { Edit2, Trash2, MapPin, Bed, Bath, Maximize } from 'lucide-react';
+import { usePagination } from '../../../../hooks/usePagination';
 import './styles/properties.css';
 
 export default function PropertiesModule() {
-  const { isOpen, onOpen, onClose } = useModal();
+  const [isOpen, setIsOpen] = useState(false);
+  const onOpen = () => setIsOpen(true);
+  const onClose = () => setIsOpen(false);
   const [items, setItems] = useState([]);
   const [countries, setCountries] = useState([]);
   const [departments, setDepartments] = useState([]);
@@ -32,8 +33,7 @@ export default function PropertiesModule() {
   const [uploadedImages, setUploadedImages] = useState([]);
   const [primaryImageId, setPrimaryImageId] = useState(null);
   
-  // Paginación: máximo 10 propiedades por página
-  const pagination = usePagination(items, 10);
+  const pagination = usePagination(items, 6);
   const paginatedItems = pagination.paginatedItems;
 
   const loadData = async () => {
@@ -158,87 +158,115 @@ export default function PropertiesModule() {
               const propType = types.find(t => t.id === property.typeId);
               const neighborhood = neighborhoods.find(n => n.id === property.neighborhoodId);
               const city = cities.find(c => c.id === property.cityId);
-              const imageUrl = property.imagenes 
-                ? (typeof property.imagenes === 'string' ? JSON.parse(property.imagenes)[0]?.url : property.imagenes[0]?.url)
-                : null;
+              const owner = owners.find(o => o.id === property.ownerId);
+              
+              let imageUrl = null;
+              try {
+                const images = property.imagenes 
+                  ? (typeof property.imagenes === 'string' ? JSON.parse(property.imagenes) : property.imagenes)
+                  : [];
+                imageUrl = Array.isArray(images) && images.length > 0 ? images[0].url || images[0] : null;
+              } catch (e) {
+                console.error('Error parsing images:', e);
+              }
 
               return (
-                <article key={property.id} className="property-card-wrapper">
-                  <div className="property-card-inner">
-                    {/* IMAGEN */}
-                    <div className="property-image-wrapper">
+                <article key={property.id} className="property-card">
+                  {/* IMAGEN CON OVERLAY */}
+                  <div className="property-card__image-wrapper">
+                    {imageUrl ? (
                       <img 
-                        src={imageUrl || 'https://via.placeholder.com/400x300?text=Sin+imagen'} 
-                        alt={property.address}
-                        className="property-image"
+                        src={imageUrl} 
+                        alt={property.titulo || property.address}
+                        className="property-card__image"
                       />
-                      <div className="property-image-overlay"></div>
-                      {propType && (
-                        <span className="property-badge">{propType.name}</span>
-                      )}
+                    ) : (
+                      <div className="property-card__no-image">
+                        Sin imagen
+                      </div>
+                    )}
+                    <div className="property-card__overlay"></div>
+                    
+                    {/* BADGE DEL TIPO */}
+                    {propType && (
+                      <span className="property-card__badge">{propType.name}</span>
+                    )}
+                  </div>
+
+                  {/* CONTENIDO */}
+                  <div className="property-card__content">
+                    {/* TÍTULO */}
+                    <h3 className="property-card__title">
+                      {property.titulo || property.address}
+                    </h3>
+
+                    {/* UBICACIÓN */}
+                    <div className="property-card__location">
+                      <MapPin size={18} className="property-card__location-icon" />
+                      <div className="property-card__location-text">
+                        <p className="property-card__address">
+                          {property.address || property.direccion}
+                        </p>
+                        <p className="property-card__city">
+                          {neighborhood?.name || ''}{neighborhood?.name && city?.name ? ', ' : ''}{city?.name || ''}
+                        </p>
+                      </div>
                     </div>
 
-                    {/* CONTENIDO */}
-                    <div className="property-card-content">
-                      {/* UBICACIÓN */}
-                      <div className="property-location">
-                        <MapPin size={20} className="property-location-icon" />
-                        <div className="property-location-text">
-                          <p className="property-address">{property.address}</p>
-                          <button 
-                            className="property-city-btn"
-                            style={{background:'transparent',border:'none',cursor:'pointer',color:'#6b7280',padding:0,textAlign:'left'}}
-                          >
-                            {city?.name || 'Ciudad no disponible'}
-                          </button>
+                    {/* CARACTERÍSTICAS */}
+                    <div className="property-card__features">
+                      {property.bedrooms || property.habitaciones ? (
+                        <div className="property-card__feature">
+                          <Bed size={16} />
+                          <span>{property.bedrooms || property.habitaciones}</span>
                         </div>
+                      ) : null}
+                      
+                      {property.bathrooms || property.banos ? (
+                        <div className="property-card__feature">
+                          <Bath size={16} />
+                          <span>{property.bathrooms || property.banos}</span>
+                        </div>
+                      ) : null}
+                      
+                      {property.area ? (
+                        <div className="property-card__feature">
+                          <Maximize size={16} />
+                          <span>{property.area} m²</span>
+                        </div>
+                      ) : null}
+                    </div>
+
+                    {/* FOOTER CON PRECIO Y ACCIONES */}
+                    <div className="property-card__footer">
+                      <div className="property-card__price-section">
+                        <span className="property-card__price-label">Precio</span>
+                        <p className="property-card__price">
+                          ${(property.price || property.precio)?.toLocaleString('es-CO') || '0'}
+                        </p>
+                        {owner && (
+                          <p className="property-card__owner">{owner.name}</p>
+                        )}
                       </div>
-
-                      {/* CARACTERÍSTICAS */}
-                      <ul className="property-features">
-                        {property.bedrooms && (
-                          <li className="property-feature">
-                            <Bed size={16} className="property-feature-icon" />
-                            <span>{property.bedrooms}</span>
-                          </li>
-                        )}
-                        {property.bathrooms && (
-                          <li className="property-feature">
-                            <Bath size={16} className="property-feature-icon" />
-                            <span>{property.bathrooms}</span>
-                          </li>
-                        )}
-                        <li className="property-feature">
-                          <MapPin size={16} className="property-feature-icon" />
-                          <span>{neighborhood?.name || 'N/A'}</span>
-                        </li>
-                      </ul>
-
-                      {/* FOOTER */}
-                      <footer className="property-footer">
-                        <div>
-                          <span className="property-price-label">Precio</span>
-                          <p className="property-price">${property.price?.toLocaleString('es-CO') || '0'}</p>
-                        </div>
-                        <div className="property-actions">
-                          <button 
-                            className="action-btn action-btn--edit"
-                            onClick={() => handleOpenModal(property)}
-                            title="Editar"
-                            type="button"
-                          >
-                            <Edit2 size={16} />
-                          </button>
-                          <button 
-                            className="action-btn action-btn--delete"
-                            onClick={() => handleDelete(property.id)}
-                            title="Eliminar"
-                            type="button"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </div>
-                      </footer>
+                      
+                      <div className="property-card__actions">
+                        <button 
+                          className="action-btn action-btn--edit"
+                          onClick={() => handleOpenModal(property)}
+                          title="Editar"
+                          type="button"
+                        >
+                          <Edit2 size={18} />
+                        </button>
+                        <button 
+                          className="action-btn action-btn--delete"
+                          onClick={() => handleDelete(property.id)}
+                          title="Eliminar"
+                          type="button"
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 </article>
@@ -246,7 +274,6 @@ export default function PropertiesModule() {
             })}
           </div>
 
-          {/* PAGINADOR */}
           <Pagination
             currentPage={pagination.currentPage}
             totalPages={pagination.totalPages}

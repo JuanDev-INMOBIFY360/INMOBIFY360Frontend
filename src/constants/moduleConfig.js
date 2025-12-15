@@ -49,30 +49,6 @@ export const ADMIN_MODULES = [
     Icon: Archive,
     moduleName: "typeProperty",
   },
-  {
-    to: "/admin/countries",
-    label: "Países",
-    Icon: Globe,
-    moduleName: "country",
-  },
-  {
-    to: "/admin/departments",
-    label: "Departamentos",
-    Icon: Layers,
-    moduleName: "department",
-  },
-  {
-    to: "/admin/cities",
-    label: "Ciudades",
-    Icon: MapPin,
-    moduleName: "city",
-  },
-  {
-    to: "/admin/neighborhoods",
-    label: "Barrios",
-    Icon: Layers,
-    moduleName: "neighborhood",
-  },
 ];
 
 /**

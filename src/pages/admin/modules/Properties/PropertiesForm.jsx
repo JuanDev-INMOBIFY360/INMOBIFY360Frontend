@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import Modal from '../../../../components/Modal/';
 import PropertiesStepsForm from './PropertiesStepsForm';
 
 export default function PropertiesForm({
@@ -19,29 +18,21 @@ export default function PropertiesForm({
   isSubmitting
 }) {
   return (
-    <Modal
-      isOpen={true}
-      title={item ? 'Editar Propiedad' : 'Crear Propiedad'}
+    <PropertiesStepsForm
+      item={item}
+      countries={countries}
+      departments={departments}
+      cities={cities}
+      neighborhoods={neighborhoods}
+      types={types}
+      owners={owners}
+      uploadedImages={uploadedImages}
+      setUploadedImages={setUploadedImages}
+      primaryImageId={primaryImageId}
+      setPrimaryImageId={setPrimaryImageId}
+      onSave={onSave}
       onClose={onClose}
-      submitButtonText={item ? 'Actualizar' : 'Crear'}
       isSubmitting={isSubmitting}
-    >
-      <PropertiesStepsForm
-        item={item}
-        countries={countries}
-        departments={departments}
-        cities={cities}
-        neighborhoods={neighborhoods}
-        types={types}
-        owners={owners}
-        uploadedImages={uploadedImages}
-        setUploadedImages={setUploadedImages}
-        primaryImageId={primaryImageId}
-        setPrimaryImageId={setPrimaryImageId}
-        onSave={onSave}
-        onClose={onClose}
-        isSubmitting={isSubmitting}
-      />
-    </Modal>
+    />
   );
 }

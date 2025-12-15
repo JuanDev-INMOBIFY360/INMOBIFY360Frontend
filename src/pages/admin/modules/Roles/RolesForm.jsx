@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import Modal from '../../../../components/Modal/';
 
 export default function RolesForm({ role, onSave, onClose, isSubmitting }) {
   const [formData, setFormData] = useState({
@@ -55,28 +54,34 @@ export default function RolesForm({ role, onSave, onClose, isSubmitting }) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Modal
-        isOpen={true}
-        title={role ? 'Editar Rol' : 'Crear Nuevo Rol'}
-        onClose={onClose}
-        submitButtonText={isSubmitting ? 'Guardando...' : 'Guardar'}
-        isSubmitting={isSubmitting}
-      >
-        <div className="form-group">
-          <label htmlFor="name">Nombre del Rol</label>
-          <input
-            id="name"
-            type="text"
-            name="name"
-            className={`form-input ${errors.name ? 'error' : ''}`}
-            placeholder="Ej: Administrador"
-            value={formData.name}
-            onChange={handleChange}
-          />
-          {errors.name && <span className="error-message">{errors.name}</span>}
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="roles-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>{role ? 'Editar Rol' : 'Crear Nuevo Rol'}</h3>
+          <button className="modal-close" onClick={onClose} type="button">×</button>
         </div>
-      </Modal>
-    </form>
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="name">Nombre del Rol</label>
+            <input
+              id="name"
+              type="text"
+              name="name"
+              className={`form-input ${errors.name ? 'error' : ''}`}
+              placeholder="Ej: Administrador"
+              value={formData.name}
+              onChange={handleChange}
+            />
+            {errors.name && <span className="error-message">{errors.name}</span>}
+          </div>
+
+          <div className="modal-footer">
+            <button type="button" className="btn btn--secondary" onClick={onClose} disabled={isSubmitting}>Cancelar</button>
+            <button type="submit" className="btn btn--primary" disabled={isSubmitting}>{isSubmitting ? 'Guardando...' : 'Guardar'}</button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }

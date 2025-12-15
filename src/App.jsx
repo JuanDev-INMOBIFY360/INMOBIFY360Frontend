@@ -7,12 +7,8 @@ import AdminLayout from "./layaouts/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
 import { RolesModule } from './pages/admin/modules/Roles';
 import { UsersModule } from './pages/admin/modules/Users';
-import { OwnersModule } from './pages/admin/modules/Owners';
+import OwnersModule  from './pages/admin/modules/Owners/OwnersModule.jsx';
 import { PropertiesModule } from './pages/admin/modules/Properties';
-import { CountriesModule } from './pages/admin/modules/Countries';
-import { DepartmentsModule } from './pages/admin/modules/Departments';
-import { CitiesModule } from './pages/admin/modules/Cities';
-import { NeighborhoodsModule } from './pages/admin/modules/Neighborhoods';
 import { TypesModule } from './pages/admin/modules/Types';
 import Home from "./pages/client/landing/home";
 import PropertyDetail from "./pages/client/properties/detailsProperties/PropertyDetails";
@@ -72,38 +68,6 @@ function App() {
               } 
             />
       
-            <Route 
-              path="countries" 
-              element={
-                <ProtectedRoute requiredModule="country">
-                  <CountriesModule />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="departments" 
-              element={
-                <ProtectedRoute requiredModule="department">
-                  <DepartmentsModule />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="cities" 
-              element={
-                <ProtectedRoute requiredModule="city">
-                  <CitiesModule />
-                </ProtectedRoute>
-              } 
-            />
-            <Route 
-              path="neighborhoods" 
-              element={
-                <ProtectedRoute requiredModule="neighborhood">
-                  <NeighborhoodsModule />
-                </ProtectedRoute>
-              } 
-            />
             <Route 
               path="users" 
               element={

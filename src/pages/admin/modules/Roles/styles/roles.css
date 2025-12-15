@@ -17,6 +17,31 @@
   flex-wrap: wrap;
 }
 
+.roles-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-wrapper-roles {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 6px 10px;
+  border-radius: 10px;
+}
+
+.search-input-roles {
+  border: none;
+  outline: none;
+  padding: 6px 8px;
+  background: transparent;
+  width: 220px;
+  font-size: 14px;
+}
+
 .roles-header h2 {
   font-size: 20px;
   color: var(--color-text);

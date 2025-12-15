@@ -10,7 +10,7 @@ const SearchBar = ({ initialValue = '' }) => {
   const onSubmit = (e) => {
     e.preventDefault();
     const q = query.trim();
-    // Navegar a la página de resultados con el query como parámetro
+ 
     navigate(`/search?q=${encodeURIComponent(q)}`);
   };
 

@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import Modal from "../../../../components/Modal/";
 export default function OwnersForm({ item, onSave, onClose, isSubmitting }) {
   const [formData, setFormData] = useState({ name: "", email: "", phone: "" });
   const [errors, setErrors] = useState({});
@@ -30,57 +29,63 @@ export default function OwnersForm({ item, onSave, onClose, isSubmitting }) {
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <Modal
-        isOpen={true}
-        title={item ? "Editar Propietario" : "Crear Nuevo Propietario"}
-        onClose={onClose}
-        submitButtonText={isSubmitting ? "Guardando..." : "Guardar"}
-        isSubmitting={isSubmitting}
-      >
-        <div className="form-group">
-          <label htmlFor="name">Nombre</label>
-          <input
-            id="name"
-            type="text"
-            name="name"
-            className={`form-input ${errors.name ? "error" : ""}`}
-            placeholder="Nombre completo"
-            value={formData.name}
-            onChange={handleChange}
-          />
-          {errors.name && (
-            <span className="error-message">{errors.name}</span>
-          )}
+    <div className="modal-overlay" onClick={onClose}>
+      <div className="owners-modal" onClick={(e) => e.stopPropagation()}>
+        <div className="modal-header">
+          <h3>{item ? "Editar Propietario" : "Crear Nuevo Propietario"}</h3>
+          <button className="modal-close" onClick={onClose} type="button">×</button>
         </div>
-        <div className="form-group">
-          <label htmlFor="email">Email</label>
-          <input
-            id="email"
-            type="email"
-            name="email"
-            className={`form-input ${errors.email ? "error" : ""}`}
-            placeholder="correo@ejemplo.com"
-            value={formData.email}
-            onChange={handleChange}
-          />
-          {errors.email && (
-            <span className="error-message">{errors.email}</span>
-          )}
-        </div>
-        <div className="form-group">
-          <label htmlFor="phone">Teléfono</label>
-          <input
-            id="phone"
-            type="tel"
-            name="phone"
-            className="form-input"
-            placeholder="+57 123 456 7890"
-            value={formData.phone}
-            onChange={handleChange}
-          />
-        </div>
-      </Modal>
-    </form>
+
+        <form onSubmit={handleSubmit}>
+          <div className="form-group">
+            <label htmlFor="name">Nombre</label>
+            <input
+              id="name"
+              type="text"
+              name="name"
+              className={`form-input ${errors.name ? "error" : ""}`}
+              placeholder="Nombre completo"
+              value={formData.name}
+              onChange={handleChange}
+            />
+            {errors.name && (
+              <span className="error-message">{errors.name}</span>
+            )}
+          </div>
+          <div className="form-group">
+            <label htmlFor="email">Email</label>
+            <input
+              id="email"
+              type="email"
+              name="email"
+              className={`form-input ${errors.email ? "error" : ""}`}
+              placeholder="correo@ejemplo.com"
+              value={formData.email}
+              onChange={handleChange}
+            />
+            {errors.email && (
+              <span className="error-message">{errors.email}</span>
+            )}
+          </div>
+          <div className="form-group">
+            <label htmlFor="phone">Teléfono</label>
+            <input
+              id="phone"
+              type="tel"
+              name="phone"
+              className="form-input"
+              placeholder="+57 123 456 7890"
+              value={formData.phone}
+              onChange={handleChange}
+            />
+          </div>
+
+          <div className="modal-footer">
+            <button type="button" className="btn btn--secondary" onClick={onClose} disabled={isSubmitting}>Cancelar</button>
+            <button type="submit" className="btn btn--primary" disabled={isSubmitting}>{isSubmitting ? "Guardando..." : "Guardar"}</button>
+          </div>
+        </form>
+      </div>
+    </div>
   );
 }

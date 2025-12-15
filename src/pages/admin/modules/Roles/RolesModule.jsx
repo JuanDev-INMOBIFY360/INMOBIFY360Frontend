@@ -1,14 +1,13 @@
 import { useState, useEffect } from "react";
+import { IoSearch, IoCreate, IoTrash } from 'react-icons/io5';
 import {
   getRoles,
   createRole,
   updateRole,
   deleteRole,
 } from "../../../../services/RolesService";
-import { useModal } from "../../../../hooks/useModal";
-import { usePagination } from "../../../../hooks/usePagination";
-import TablesModule from "../../../../components/TablesModule/";
-import Pagination from "../../../../components/Pagination";
+
+// Note: Replaced TablesModule + Pagination with inline table and search (Owners pattern)
 import RolesForm from "./RolesForm";
 import { rolesConfig } from "./config";
 import ErrorMessage from "../../../../components/ErrorMessage";
@@ -27,13 +26,23 @@ import "./styles/roles.css";
 export default function RolesModule() {
   // ===== STATE =====
   const [roles, setRoles] = useState([]);
+  const [filteredRoles, setFilteredRoles] = useState([]);
+  const [searchTerm, setSearchTerm] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [editingRole, setEditingRole] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const { isOpen, onOpen, onClose } = useModal();
-  const pagination = usePagination(roles, 10);
-  const paginatedItems = pagination.paginatedItems;
+  const [isOpen, setIsOpen] = useState(false);
+  const onOpen = () => setIsOpen(true);
+  const onClose = () => setIsOpen(false);
+  
+
+  useEffect(() => {
+    const filtered = roles.filter(r => r.name?.toLowerCase().includes(searchTerm.toLowerCase()));
+    setFilteredRoles(filtered);
+  }, [searchTerm, roles]);
+
+  const handleSearchChange = (e) => setSearchTerm(e.target.value);
 
   // ===== EFFECTS =====
   useEffect(() => {
@@ -102,9 +111,15 @@ export default function RolesModule() {
       {/* HEADER */}
       <div className="roles-header">
         <h2>Roles</h2>
-        <button className="btn btn--primary" onClick={() => handleOpenModal()}>
-          + Crear Rol
-        </button>
+        <div className="roles-controls">
+          <div className="search-wrapper-roles">
+            {/* <IoSearch className="search-icon" /> */} 
+            <input type="text" className="search-input-roles" placeholder="Buscar roles..." value={searchTerm} onChange={handleSearchChange} />
+          </div>
+          <button className="btn btn--primary" onClick={() => handleOpenModal()}>
+            + Crear Rol
+          </button>
+        </div>
       </div>
 
       {/* ERROR MESSAGE */}
@@ -122,24 +137,41 @@ export default function RolesModule() {
 
       {/* TABLA */}
       {!loading && (
-        <>
-          <TablesModule
-            data={paginatedItems}
-            columns={rolesConfig.columns}
-            onEdit={handleOpenModal}
-            onDelete={handleDelete}
-            loading={loading}
-            emptyMessage={`No hay ${rolesConfig.moduleNamePlural.toLowerCase()} registrados`}
-          />
-          <Pagination
-            currentPage={pagination.currentPage}
-            totalPages={pagination.totalPages}
-            totalItems={roles.length}
-            itemsPerPage={10}
-            onPageChange={pagination.handlePageChange}
-            isLoading={loading}
-          />
-        </>
+        <div className="roles-table-container">
+          <table className="roles-table">
+            <thead>
+              <tr>
+                {rolesConfig.columns.map(c => <th key={c.key}>{c.title}</th>)}
+                <th>Acciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              {filteredRoles.length === 0 ? (
+                <tr>
+                  <td colSpan={rolesConfig.columns.length + 1} className="no-data">{`No hay ${rolesConfig.moduleNamePlural.toLowerCase()} registrados`}</td>
+                </tr>
+              ) : (
+                filteredRoles.map(role => (
+                  <tr key={role.id}>
+                    {rolesConfig.columns.map(col => (
+                      <td key={col.key}>{col.render ? col.render(role) : (role[col.key] ?? '')}</td>
+                    ))}
+                    <td>
+                      <div className="action-buttons">
+                        <button className="action-btn action-btn--edit" title="Editar" onClick={() => handleOpenModal(role)}>
+                          <IoCreate className="action-icon" />
+                        </button>
+                        <button className="action-btn action-btn--delete" title="Eliminar" onClick={() => handleDelete(role.id)}>
+                          <IoTrash className="action-icon" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {/* MODAL CON FORM */}

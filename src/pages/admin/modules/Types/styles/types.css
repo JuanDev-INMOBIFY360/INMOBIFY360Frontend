@@ -11,6 +11,34 @@
   align-items: center; 
   margin-bottom: 20px; 
 }
+.types-controls {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.search-wrapper-types {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  padding: 6px 10px;
+  border-radius: 10px;
+}
+
+.search-input-types {
+  border: none;
+  outline: none;
+  padding: 6px 8px;
+  background: transparent;
+  width: 220px;
+  font-size: 14px;
+}
+
+.search-icon {
+  color: var(--color-text-secondary);
+}
 
 .types-header h2 { 
   font-size: 18px; 

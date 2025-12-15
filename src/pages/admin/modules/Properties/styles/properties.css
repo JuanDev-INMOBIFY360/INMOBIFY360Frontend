@@ -30,207 +30,249 @@
 
 .properties-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
   gap: 24px;
   margin-bottom: 24px;
 }
 
 /* ============================================
-   PROPERTY CARD
+   PROPERTY CARD - DISEÑO MODERNO
    ============================================ */
 
-.property-card-wrapper {
-  flex-shrink: 0;
-}
-
-.property-card-inner {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 12px;
+.property-card {
+  background: var(--color-surface, #ffffff);
+  border-radius: 16px;
   overflow: hidden;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  transition: all 0.3s ease;
-  height: 100%;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   display: flex;
   flex-direction: column;
+  height: 100%;
 }
 
-.property-card-inner:hover {
-  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-  transform: translateY(-4px);
-  border-color: var(--color-primary);
+.property-card:hover {
+  transform: translateY(-8px);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.15);
 }
 
-/* ============================================
-   PROPERTY IMAGE
-   ============================================ */
-
-.property-image-wrapper {
+/* IMAGEN CON OVERLAY */
+.property-card__image-wrapper {
   position: relative;
-  height: 200px;
+  width: 100%;
+  height: 240px;
   overflow: hidden;
-  background: linear-gradient(135deg, var(--color-bg) 0%, var(--color-surface) 100%);
+  background: linear-gradient(135deg, #f5f7fa 0%, #e4e8ed 100%);
 }
 
-.property-image {
+.property-card__image {
   width: 100%;
   height: 100%;
   object-fit: cover;
   transition: transform 0.5s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
-.property-card-inner:hover .property-image {
-  transform: scale(1.08);
+.property-card:hover .property-card__image {
+  transform: scale(1.1);
 }
 
-.property-image-overlay {
+.property-card__no-image {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #94a3b8;
+  font-size: 14px;
+  font-weight: 500;
+  background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+}
+
+/* OVERLAY GRADIENT */
+.property-card__overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, transparent 0%, rgba(0, 0, 0, 0.4) 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
+  background: linear-gradient(
+    180deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.05) 50%,
+    rgba(0, 0, 0, 0.3) 100%
+  );
+  pointer-events: none;
 }
 
-.property-card-inner:hover .property-image-overlay {
-  opacity: 1;
-}
-
-.property-badge {
+/* BADGE DEL TIPO */
+.property-card__badge {
   position: absolute;
-  top: 12px;
-  right: 12px;
-  background-color: var(--color-primary);
+  top: 16px;
+  right: 16px;
+  background: rgba(59, 130, 246, 0.95);
+  backdrop-filter: blur(8px);
   color: white;
-  padding: 6px 12px;
-  border-radius: 20px;
-  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: 24px;
   font-size: 12px;
+  font-weight: 600;
   z-index: 2;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
 }
 
-/* ============================================
-   PROPERTY CONTENT
-   ============================================ */
-
-.property-card-content {
-  padding: 18px;
-  flex: 1;
+/* CONTENIDO DE LA CARD */
+.property-card__content {
+  padding: 20px;
   display: flex;
   flex-direction: column;
+  gap: 12px;
+  flex: 1;
 }
 
-/* ============================================
-   PROPERTY LOCATION
-   ============================================ */
+/* TÍTULO */
+.property-card__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--color-text, #1e293b);
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  min-height: 44px;
+}
 
-.property-location {
+/* UBICACIÓN */
+.property-card__location {
   display: flex;
   align-items: flex-start;
   gap: 10px;
-  margin-bottom: 12px;
-}
-
-.property-location-icon {
-  width: 20px;
-  height: 20px;
-  color: var(--color-primary);
-  flex-shrink: 0;
-  margin-top: 2px;
-}
-
-.property-location-text {
-  flex: 1;
-}
-
-.property-address {
-  color: var(--color-text);
-  font-weight: 600;
-  font-size: 14px;
-  line-height: 1.4;
-  margin: 0;
-}
-
-.property-city-btn {
-  color: var(--color-text-secondary);
-  font-size: 12px;
-  margin: 4px 0 0;
-  padding: 0;
-  border: none;
-  background: transparent;
-  cursor: pointer;
-  transition: color 0.2s;
-  text-align: left;
-}
-
-.property-city-btn:hover {
-  color: var(--color-primary);
-}
-
-/* ============================================
-   PROPERTY FEATURES
-   ============================================ */
-
-.property-features {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 0;
-  margin: 12px 0;
-  border-top: 1px solid var(--color-border);
-  border-bottom: 1px solid var(--color-border);
-  list-style: none;
-  flex-wrap: wrap;
-}
-
-.property-feature {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--color-text);
-  font-weight: 500;
-}
-
-.property-feature-icon {
-  width: 16px;
-  height: 16px;
-  color: var(--color-primary);
-  flex-shrink: 0;
-}
-
-/* ============================================
-   PROPERTY FOOTER
-   ============================================ */
-
-.property-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-top: auto;
-  padding-top: 12px;
-}
-
-.property-price-label {
-  display: block;
-  color: var(--color-text-secondary);
-  font-size: 11px;
-  text-transform: uppercase;
-  font-weight: 600;
   margin-bottom: 4px;
 }
 
-.property-price {
-  font-size: 18px;
-  font-weight: 700;
-  color: var(--color-primary);
-  margin: 0;
+.property-card__location-icon {
+  flex-shrink: 0;
+  color: #3b82f6;
+  margin-top: 2px;
 }
 
-.property-actions {
+.property-card__location-text {
+  flex: 1;
+}
+
+.property-card__address {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--color-text, #1e293b);
+  line-height: 1.4;
+}
+
+.property-card__city {
+  margin: 4px 0 0 0;
+  font-size: 12px;
+  color: #64748b;
+  line-height: 1.3;
+}
+
+/* CARACTERÍSTICAS */
+.property-card__features {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 12px 0;
+  border-top: 1px solid #e2e8f0;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.property-card__feature {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  color: #475569;
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.property-card__feature svg {
+  color: #3b82f6;
+  flex-shrink: 0;
+}
+
+/* FOOTER */
+.property-card__footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  margin-top: auto;
+  padding-top: 16px;
+  gap: 12px;
+}
+
+.property-card__price-section {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.property-card__price-label {
+  display: block;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  color: #94a3b8;
+  letter-spacing: 0.5px;
+  margin-bottom: 4px;
+}
+
+.property-card__price {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 800;
+  color: #3b82f6;
+  line-height: 1;
+}
+
+.property-card__owner {
+  margin: 0;
+  font-size: 12px;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+/* ACCIONES */
+.property-card__actions {
   display: flex;
   gap: 8px;
   align-items: center;
+}
+
+.action-btn {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  border: none;
+  background: #f1f5f9;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  color: #64748b;
+}
+
+.action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.action-btn--edit:hover {
+  background: #3b82f6;
+  color: white;
+}
+
+.action-btn--delete:hover {
+  background: #ef4444;
+  color: white;
 }
 
 /* ============================================
@@ -252,304 +294,7 @@
 }
 
 /* ============================================
-   RESPONSIVE
-   ============================================ */
-
-@media (max-width: 1200px) {
-  .properties-grid {
-    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 20px;
-  }
-}
-
-@media (max-width: 768px) {
-  .properties-module {
-    padding: 16px;
-  }
-
-  .properties-header {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .properties-grid {
-    grid-template-columns: 1fr;
-    gap: 16px;
-  }
-
-  .property-image-wrapper {
-    height: 180px;
-  }
-
-  .property-card-content {
-    padding: 16px;
-  }
-
-  .property-footer {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 12px;
-  }
-
-  .property-actions {
-    width: 100%;
-    justify-content: flex-start;
-  }
-}
-
-@media (max-width: 480px) {
-  .property-features {
-    gap: 8px;
-  }
-
-  .property-feature {
-    font-size: 12px;
-  }
-
-  .property-price {
-    font-size: 16px;
-  }
-}
-
-.properties-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 24px;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.properties-header h2 {
-  font-size: 18px;
-  color: var(--color-text);
-  margin: 0;
-  font-weight: 700;
-}
-
-/* ============================================
-   PROPERTIES GRID
-   ============================================ */
-
-.properties-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 24px;
-  margin-top: 20px;
-}
-
-.properties-grid__empty {
-  grid-column: 1/-1;
-  text-align: center;
-  padding: 40px 20px;
-  color: var(--color-text-secondary);
-  font-style: italic;
-  font-size: 14px;
-}
-
-.properties-empty {
-  text-align: center;
-  padding: 60px 20px;
-  color: var(--color-text-secondary);
-  font-size: 15px;
-}
-
-.properties-empty p {
-  margin: 0;
-}
-
-/* ============================================
-   PROPERTY CARDS - NEW DESIGN
-   ============================================ */
-
-.admin-property-card {
-  background: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: 14px;
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.07);
-  height: 100%;
-}
-
-.admin-property-card:hover {
-  box-shadow: 0 16px 32px rgba(0, 0, 0, 0.12);
-  transform: translateY(-6px);
-  border-color: var(--color-primary);
-}
-
-/* IMAGE SECTION */
-.admin-property-card-image {
-  position: relative;
-  width: 100%;
-  height: 220px;
-  overflow: hidden;
-  background: linear-gradient(135deg, #f3f4f6, #e5e7eb);
-}
-
-.admin-property-card-image img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.admin-property-card:hover .admin-property-card-image img {
-  transform: scale(1.08);
-}
-
-.admin-property-card__no-image {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%);
-  color: var(--color-text-secondary);
-  font-size: 14px;
-  font-weight: 500;
-}
-
-/* BADGE OVERLAY */
-.admin-property-card-badge {
-  position: absolute;
-  top: 12px;
-  right: 12px;
-  background: var(--color-primary);
-  color: white;
-  padding: 6px 16px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
-  z-index: 2;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-}
-
-/* OVERLAY GRADIENT */
-.property-image-overlay {
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.3) 100%);
-  opacity: 0;
-  transition: opacity 0.3s ease;
-  z-index: 1;
-}
-
-.admin-property-card:hover .property-image-overlay {
-  opacity: 1;
-}
-
-/* CONTENT SECTION */
-.admin-property-card-content {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  padding: 20px;
-}
-
-.admin-property-card-title {
-  margin: 0 0 10px;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--color-text);
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-/* LOCATION & FEATURES */
-.admin-property-card-location {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  margin-bottom: 12px;
-  color: var(--color-text-secondary);
-  font-size: 13px;
-  min-height: 20px;
-}
-
-.admin-property-card-location svg {
-  color: var(--color-primary);
-  flex-shrink: 0;
-  width: 16px;
-  height: 16px;
-}
-
-.admin-property-card-features {
-  display: flex;
-  gap: 12px;
-  flex-wrap: wrap;
-  padding-bottom: 12px;
-  margin-bottom: 12px;
-  border-bottom: 1px solid var(--color-border);
-  font-size: 12px;
-  color: var(--color-text-secondary);
-}
-
-.admin-property-card-features span {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  white-space: nowrap;
-  padding: 4px 8px;
-  background: rgba(59, 130, 246, 0.05);
-  border-radius: 6px;
-}
-
-.admin-property-card-features svg {
-  color: var(--color-primary);
-  width: 14px;
-  height: 14px;
-  flex-shrink: 0;
-}
-
-/* FOOTER WITH PRICE & ACTIONS */
-.admin-property-card-footer {
-  display: flex;
-  align-items: flex-end;
-  justify-content: space-between;
-  gap: 12px;
-  margin-top: auto;
-  padding-top: 12px;
-  border-top: 1px solid var(--color-border);
-}
-
-.admin-property-card-price {
-  margin: 0;
-  font-size: 18px;
-  font-weight: 800;
-  color: var(--color-primary);
-  line-height: 1.1;
-}
-
-.admin-property-card-owner {
-  margin: 4px 0 0;
-  font-size: 12px;
-  color: var(--color-text-secondary);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-/* ACTIONS - LARGE BUTTONS */
-.admin-property-card-actions {
-  display: flex;
-  gap: 8px;
-  align-items: center;
-  justify-content: flex-end;
-}
-
-/* BUTTON ANIMATIONS ON CARD HOVER */
-.admin-property-card:hover .admin-property-card-actions .action-btn {
-  opacity: 1;
-}
-
-/* ============================================
-   PROPERTY GRID RESPONSIVE
+   PROPERTIES MODAL & FORM
    ============================================ */
 
 .properties-modal {
@@ -613,14 +358,7 @@
   color: var(--color-text);
 }
 
-.properties-form-close:hover {
-  color: var(--color-text);
-}
-
-/* ============================================
-   STEPS INDICATOR
-   ============================================ */
-
+/* STEPS INDICATOR */
 .properties-steps-indicator {
   display: flex;
   justify-content: space-between;
@@ -662,10 +400,7 @@
   font-size: 13px;
 }
 
-/* ============================================
-   FORM STYLES
-   ============================================ */
-
+/* FORM STYLES */
 .properties-form {
   display: flex;
   flex-direction: column;
@@ -715,10 +450,7 @@
   gap: 14px;
 }
 
-/* ============================================
-   IMAGES GALLERY
-   ============================================ */
-
+/* IMAGES GALLERY */
 .properties-images-gallery {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
@@ -803,10 +535,7 @@
   padding: 6px;
 }
 
-/* ============================================
-   SUMMARY
-   ============================================ */
-
+/* SUMMARY */
 .properties-summary {
   background: rgba(59, 130, 246, 0.03);
   padding: 16px;
@@ -843,10 +572,7 @@
   margin-bottom: 2px;
 }
 
-/* ============================================
-   FORM ACTIONS
-   ============================================ */
-
+/* FORM ACTIONS */
 .properties-form-actions {
   display: flex;
   gap: 10px;
@@ -892,11 +618,15 @@
   cursor: not-allowed;
 }
 
-
-
 /* ============================================
    RESPONSIVE DESIGN
    ============================================ */
+
+@media (max-width: 1200px) {
+  .properties-grid {
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  }
+}
 
 @media (max-width: 768px) {
   .properties-module {
@@ -906,7 +636,6 @@
   .properties-header {
     flex-direction: column;
     align-items: stretch;
-    margin-bottom: 16px;
   }
 
   .properties-header button {
@@ -915,6 +644,16 @@
 
   .properties-grid {
     grid-template-columns: 1fr;
+    gap: 16px;
+  }
+
+  .property-card__image-wrapper {
+    height: 200px;
+  }
+
+  .property-card__features {
+    flex-wrap: wrap;
+    gap: 12px;
   }
 
   .properties-form-container {
@@ -924,26 +663,35 @@
 
   .properties-form-row {
     grid-template-columns: 1fr;
-    gap: 12px;
-  }
-
-  .properties-images-gallery {
-    grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-    gap: 10px;
-    padding: 12px;
   }
 
   .properties-summary-grid {
     grid-template-columns: 1fr;
   }
 
-  .properties-steps-indicator {
-    gap: 4px;
-  }
-
   .step {
     width: 36px;
     height: 36px;
-    font-size: 11px;
+  }
+}
+
+@media (max-width: 480px) {
+  .property-card__title {
+    font-size: 15px;
+  }
+
+  .property-card__price {
+    font-size: 20px;
+  }
+
+  .property-card__footer {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 12px;
+  }
+
+  .property-card__actions {
+    width: 100%;
+    justify-content: flex-start;
   }
 }

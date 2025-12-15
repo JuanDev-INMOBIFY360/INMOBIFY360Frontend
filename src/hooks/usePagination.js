@@ -1,47 +1,35 @@
-import { useState, useMemo } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 
 /**
- * Hook para manejar paginación de datos
- * @param {Array} items - Lista de items a paginar
- * @param {Number} itemsPerPage - Cantidad de items por página
- * @returns {Object} Objeto con datos paginados y funciones de control
+ * Simple pagination hook
+ * @param {Array} items - items to paginate
+ * @param {number} itemsPerPage - number of items per page
  */
-export const usePagination = (items = [], itemsPerPage = 10) => {
+export function usePagination(items = [], itemsPerPage = 10) {
   const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = useMemo(() => {
-    return Math.ceil(items.length / itemsPerPage);
-  }, [items.length, itemsPerPage]);
+  useEffect(() => {
+    // Reset to first page when items change
+    setCurrentPage(1);
+  }, [items, itemsPerPage]);
+
+  const totalPages = useMemo(() => Math.max(1, Math.ceil((items?.length || 0) / itemsPerPage)), [items, itemsPerPage]);
 
   const paginatedItems = useMemo(() => {
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    return items.slice(startIndex, endIndex);
+    const start = (currentPage - 1) * itemsPerPage;
+    return (items || []).slice(start, start + itemsPerPage);
   }, [items, currentPage, itemsPerPage]);
 
   const handlePageChange = (page) => {
-    const validPage = Math.max(1, Math.min(page, totalPages || 1));
-    setCurrentPage(validPage);
-    // Scroll al top
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    const next = Math.min(Math.max(1, page), totalPages);
+    setCurrentPage(next);
   };
-
-  const goToFirstPage = () => handlePageChange(1);
-  const goToLastPage = () => handlePageChange(totalPages);
-  const goToNextPage = () => handlePageChange(currentPage + 1);
-  const goToPreviousPage = () => handlePageChange(currentPage - 1);
 
   return {
     currentPage,
     totalPages,
     paginatedItems,
     handlePageChange,
-    goToFirstPage,
-    goToLastPage,
-    goToNextPage,
-    goToPreviousPage,
-    startIndex: (currentPage - 1) * itemsPerPage + 1,
-    endIndex: Math.min(currentPage * itemsPerPage, items.length),
-    totalItems: items.length
+    itemsPerPage,
   };
-};
+}
