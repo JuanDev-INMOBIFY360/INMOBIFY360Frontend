@@ -5,11 +5,11 @@ import ProtectedRoute from "./routes/ProtectedRoute";
 import Login from "./pages/admin/auth/Login";
 import AdminLayout from "./layaouts/admin/AdminLayout";
 import Dashboard from "./pages/admin/Dashboard";
-import { RolesModule } from './pages/admin/modules/Roles';
-import { UsersModule } from './pages/admin/modules/Users';
-import OwnersModule  from './pages/admin/modules/Owners/OwnersModule.jsx';
-import { PropertiesModule } from './pages/admin/modules/Properties';
-import { TypesModule } from './pages/admin/modules/Types';
+import TableOwners from "./pages/admin/modules/owners/TableOwners.jsx";
+import TableRoles from "./pages/admin/modules/roles/TableRoles.jsx";
+import TableUsers from "./pages/admin/modules/users/TableUsers.jsx";
+import TableTypes from "./pages/admin/modules/types/TableTypes.jsx";
+import PropertyModule from "./pages/admin/modules/Properties/PropertyModule.jsx";
 import Home from "./pages/client/landing/home";
 import PropertyDetail from "./pages/client/properties/detailsProperties/PropertyDetails";
 import PublicLayout from "./layaouts/PublicLayout";
@@ -47,7 +47,7 @@ function App() {
               path="properties" 
               element={
                 <ProtectedRoute requiredModule="property">
-                  <PropertiesModule />
+                  <PropertyModule />
                 </ProtectedRoute>
               } 
             />
@@ -55,7 +55,7 @@ function App() {
               path="roles" 
               element={
                 <ProtectedRoute requiredModule="roles">
-                  <RolesModule />
+                  <TableRoles />
                 </ProtectedRoute>
               } 
             />
@@ -63,7 +63,7 @@ function App() {
               path="owners" 
               element={
                 <ProtectedRoute requiredModule="owner">
-                  <OwnersModule />
+                  <TableOwners />
                 </ProtectedRoute>
               } 
             />
@@ -72,7 +72,7 @@ function App() {
               path="users" 
               element={
                 <ProtectedRoute requiredModule="user">
-                  <UsersModule />
+                  <TableUsers />
                 </ProtectedRoute>
               } 
             />
@@ -80,7 +80,7 @@ function App() {
               path="types" 
               element={
                 <ProtectedRoute requiredModule="typeproperty">
-                  <TypesModule />
+                  <TableTypes />
                 </ProtectedRoute>
               } 
             />

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   Home,
   Key,
@@ -66,6 +66,14 @@ const MENU_CONFIG = [
 
 const Navbar = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
+
+  useEffect(() => {
+    // Indica que el navbar está presente para aplicar el padding-top solo en páginas públicas
+    document.body.classList.add("has-navbar");
+    return () => {
+      document.body.classList.remove("has-navbar");
+    };
+  }, []);
 
   return (
     <header className="navbar" role="banner">

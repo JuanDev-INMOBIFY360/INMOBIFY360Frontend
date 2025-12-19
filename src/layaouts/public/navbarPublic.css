@@ -9,7 +9,8 @@
   box-sizing: border-box;
 }
 
-body {
+/* Aplicar padding solo cuando el navbar está montado (evita gap en admin) */
+body.has-navbar {
   background: var(--color-surface);
   font-family: system-ui, -apple-system, sans-serif;
   padding-top: var(--navbar-height); /* Compensa el espacio del navbar fixed */

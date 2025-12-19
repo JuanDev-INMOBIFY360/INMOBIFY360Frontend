@@ -69,30 +69,29 @@
    }
    ```
 
-   HOOK useActionIcons:
-   ====================
+  HOOK useActionIcons: (DEPRECATED)
+    ==================================
 
-   El hook retorna componentes de botones configurados:
-   - Tamaño de íconos: 14px (compacto y profesional)
-   - Colores: Basados en variables CSS (--color-primary, --color-danger, etc)
+    The `useActionIcons` hook is deprecated and has been archived. The project
+    now prefers per-module inline action buttons so that each module can
+    customize markup, accessibility attributes, and spacing independently.
 
-   Uso:
-   ```jsx
-   import { useActionIcons } from "../../../../hooks/useActionIcons";
+    Recommended pattern (example for a row actions cell):
+    ```jsx
+    import { IoCreate, IoTrash, IoSearch } from 'react-icons/io5';
 
-   function MyComponent() {
-     const { EditIcon, DeleteIcon, ViewIcon, CreateIcon } = useActionIcons();
-     
-     return (
-       <>
-         <CreateIcon onClick={() => openModal()} />
-         <EditIcon onClick={() => editItem(item)} />
-         <DeleteIcon onClick={() => deleteItem(id)} />
-         <ViewIcon onClick={() => viewItem(item)} />
-       </>
-     );
-   }
-   ```
+    <div className="action-buttons">
+      <button className="action-btn action-btn--edit" title="Editar" aria-label="Editar" onClick={() => onEdit(item)}>
+        <IoCreate className="action-icon" />
+      </button>
+      <button className="action-btn action-btn--delete" title="Eliminar" aria-label="Eliminar" onClick={() => onDelete(item.id)}>
+        <IoTrash className="action-icon" />
+      </button>
+    </div>
+    ```
+
+    For backwards compatibility, a backup of the original hook implementation
+    is kept at `_archived/hooks/useActionIcons.jsx` in case you need to reference it.
 
    VENTAJAS:
    =========

@@ -4,9 +4,6 @@ import {
   Home,
   Box,
   Users,
-  Globe,
-  MapPin,
-  Layers,
   Shield,
   Archive,
 } from "lucide-react";

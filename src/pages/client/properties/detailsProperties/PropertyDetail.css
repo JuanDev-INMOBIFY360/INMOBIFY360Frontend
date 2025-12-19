@@ -373,17 +373,14 @@
 }
 
 .action-buttons {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 12px;
+  display: flex;
+
 }
 
 .action-btn {
-  display: flex;
+  display: inline-block;
   align-items: center;
   justify-content: center;
-  gap: 8px;
-  padding: 12px;
   border: 2px solid var(--color-border);
   background: var(--color-bg);
   border-radius: 6px;
