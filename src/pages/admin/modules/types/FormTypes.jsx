@@ -70,7 +70,7 @@ export default function FormTypes({ isOpen, onClose, typeToEdit, onSave }) {
         <header className="module-header">
           <h2>{formDataTypes.id ? "Editar Tipo" : "Registrar Nuevo Tipo"}</h2>
           <button 
-            className="type-close-button" 
+            className="close-button" 
             onClick={handleClose}
             type="button"
             aria-label="Cerrar modal"
