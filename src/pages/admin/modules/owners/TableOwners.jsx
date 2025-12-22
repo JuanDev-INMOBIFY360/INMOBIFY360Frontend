@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { getOwners,createOwner,updateOwner,deleteOwner } from "../../../../services/OwnersService";
+import { getOwners, createOwner, updateOwner, deleteOwner } from "../../../../services/OwnersService";
 import { SquarePen, Trash } from "lucide-react";
 import FormOwners from './FormOwners';
 
@@ -18,8 +18,8 @@ export default function TableOwners() {
   useEffect(() => {
     const filtered = owners.filter(
       (o) =>
-        o.firstName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        o.lastName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        o.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        (o.document || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
         (o.email || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
         (o.phone || "").toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -39,9 +39,8 @@ export default function TableOwners() {
     }
   };
 
-  // placeholders mínimos (no modifican lógica)
-  const handleOpenModal = (type=null) => {
-    setOwnerToEdit(type);
+  const handleOpenModal = (owner = null) => {
+    setOwnerToEdit(owner);
     setIsModalOpen(true);
   };
 
@@ -49,54 +48,53 @@ export default function TableOwners() {
     setIsModalOpen(false);
     setOwnerToEdit(null);
   };
-  const [errors, setErrors] = useState({});
 
   const handleSaveOwner = async (formData) => {
-  try {
-    if (formData.id) {
-      const {id, ...dataToSend} = formData;
-      await updateOwner(formData.id, dataToSend);
-    } else {
-      // quitar id antes de crear
-      const { id, ...dataToSend } = formData;
-      await createOwner(dataToSend);
+    try {
+      if (formData.id) {
+        // Editar: quitar id del payload
+        const { id, ...dataToSend } = formData;
+        await updateOwner(formData.id, dataToSend);
+      } else {
+        // Crear: no debería tener id en formData
+        await createOwner(formData);
+      }
+      await fetchOwners();
+    } catch (error) {
+      console.error("Error saving owner:", error);
+      throw error; // Re-lanzar para que FormOwners lo maneje
     }
-    await fetchOwners();
-    setErrors({});
-  } catch (error) {
-    console.error("Error saving owner:", error);
-    setErrors({ submit: "Error al guardar. Por favor intenta nuevamente." });
-    alert("Error al guardar el propietario.");
-  }
-};
+  };
 
-
-  const handleDeleteOwner = async (id) =>{
-    if (window.confirm(`¿Estás seguro de eliminar el tipo "${name}"?`)) {
+  const handleDeleteOwner = async (id, name) => {
+    if (window.confirm(`¿Estás seguro de eliminar al propietario "${name}"?`)) {
       try {
         await deleteOwner(id);
-        fetchOwners();
+        await fetchOwners();
       } catch (error) {
-        console.error("Error deleting type:", error);
-        alert("Error al eliminar el tipo");
+        console.error("Error deleting owner:", error);
+        alert("Error al eliminar el propietario");
       }
     }
-  }
-  if (loading) return <div>Loading...</div>;
+  };
+
+  if (loading) return <div>Cargando...</div>;
 
   return (
     <>
-      <section className="container-module">
+      <section className="container-module" aria-labelledby="owners-title">
         <header className="header-module">
-          <h1 className="title-module">Gestion de Propietarios</h1>
+          <h1 id="owners-title" className="title-module">
+            Gestión de Propietarios
+          </h1>
         </header>
 
-        <div className="controls">
+        <div className="controls" role="toolbar" aria-label="Controles de tabla">
           <div className="search-container" role="search">
             <input
-              id="search-types"
+              id="search-owners"
               type="search"
-              placeholder="Buscar tipos..."
+              placeholder="Buscar propietarios..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input-module"
@@ -106,13 +104,13 @@ export default function TableOwners() {
           <button
             type="button"
             className="btn-add"
-            aria-label="Agregar Tipo de Propiedad"
+            aria-label="Agregar Propietario"
             onClick={() => handleOpenModal()}
           >
             <span className="btn-add-icon" aria-hidden="true">
               +
             </span>
-            Agregar Tipo
+            Agregar Propietario
           </button>
         </div>
 
@@ -120,6 +118,9 @@ export default function TableOwners() {
           <table className="table-module">
             <colgroup>
               <col className="col-id" />
+              <col className="col-name" />
+              <col className="col-name" />
+              <col className="col-name" />
               <col className="col-name" />
               <col className="col-actions" />
             </colgroup>
@@ -138,25 +139,25 @@ export default function TableOwners() {
             <tbody>
               {filteredOwners.length === 0 ? (
                 <tr>
-                  <td colSpan="5" className="no-data-module">
+                  <td colSpan="6" className="no-data-module">
                     {searchTerm
-                      ? `No hay tipos que coincidan con "${searchTerm}"`
-                      : "No hay tipos registrados"}
+                      ? `No hay propietarios que coincidan con "${searchTerm}"`
+                      : "No hay propietarios registrados"}
                   </td>
                 </tr>
               ) : (
                 filteredOwners.map((owner) => (
                   <tr key={owner.id}>
                     <td>{owner.id}</td>
-                    <td>{owner.document}</td>
-                    <td>{owner.name} {owner.lastName}</td>
+                    <td>{owner.document || "N/A"}</td>
+                    <td>{owner.name}</td>
                     <td>{owner.email}</td>
-                    <td>{owner.phone}</td>
+                    <td>{owner.phone || "N/A"}</td>
                     <td>
                       <button
                         type="button"
                         className="btn-edit"
-                        aria-label="Editar"
+                        aria-label={`Editar propietario ${owner.name}`}
                         onClick={() => handleOpenModal(owner)}
                       >
                         <SquarePen />
@@ -165,8 +166,8 @@ export default function TableOwners() {
                       <button
                         type="button"
                         className="btn-delete"
-                        aria-label="Eliminar"
-                        onClick={() => handleDeleteOwner(owner.id)}
+                        aria-label={`Eliminar propietario ${owner.name}`}
+                        onClick={() => handleDeleteOwner(owner.id, owner.name)}
                       >
                         <Trash />
                       </button>
@@ -180,10 +181,10 @@ export default function TableOwners() {
       </section>
 
       <FormOwners
-      isOpen={isModalOpen}
-      onClose={handleCloseModal}
-      ownerToEdit={ownerToEdit}
-      onSave={handleSaveOwner}
+        isOpen={isModalOpen}
+        onClose={handleCloseModal}
+        ownerToEdit={ownerToEdit}
+        onSave={handleSaveOwner}
       />
     </>
   );

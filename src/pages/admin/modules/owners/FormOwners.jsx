@@ -11,8 +11,10 @@ export default function FormOwners({ isOpen, onClose, ownerToEdit, onSave }) {
   });
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
   useEffect(() => {
     if (ownerToEdit) {
+      // Solo cuando editamos incluimos el id
       setDataOwners({
         id: ownerToEdit.id,
         document: ownerToEdit.document || "",
@@ -20,10 +22,14 @@ export default function FormOwners({ isOpen, onClose, ownerToEdit, onSave }) {
         email: ownerToEdit.email || "",
         phone: ownerToEdit.phone || "",
       });
-      console.log(setDataOwners);
-      
     } else {
-      setDataOwners({ id: null, document: "", name: "", email: "", phone: "" });
+      // NO incluir id cuando es nuevo
+      setDataOwners({ 
+        document: "", 
+        name: "", 
+        email: "", 
+        phone: "" 
+      });
     }
     setErrors({});
   }, [ownerToEdit, isOpen]);
@@ -35,6 +41,7 @@ export default function FormOwners({ isOpen, onClose, ownerToEdit, onSave }) {
       setErrors((prev) => ({ ...prev, [name]: "" }));
     }
   };
+  
   const validateForm = () => {
     const newErrors = {};
     if (!formDataOwners.document.trim()) {
@@ -47,6 +54,12 @@ export default function FormOwners({ isOpen, onClose, ownerToEdit, onSave }) {
     }
     if (!formDataOwners.email.trim()) {
       newErrors.email = "El correo electrónico es requerido";
+    } else {
+      // Validación básica de email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(formDataOwners.email)) {
+        newErrors.email = "El correo electrónico no es válido";
+      }
     }
     if (!formDataOwners.phone.trim()) {
       newErrors.phone = "El teléfono es requerido";
@@ -67,13 +80,21 @@ export default function FormOwners({ isOpen, onClose, ownerToEdit, onSave }) {
       setIsSubmitting(false);
     }
   };
+  
   const handleClose = () => {
-    setDataOwners({ id: null, name: "", email: "", phone: "" });
+    setDataOwners({ 
+      document: "", 
+      name: "", 
+      email: "", 
+      phone: "" 
+    });
     setErrors({});
     setIsSubmitting(false);
     onClose();
   };
+  
   if (!isOpen) return null;
+  
   return (
     <div className="modal-container" onClick={handleClose}>
       <div className="module-container" onClick={(e) => e.stopPropagation()}>
@@ -84,50 +105,66 @@ export default function FormOwners({ isOpen, onClose, ownerToEdit, onSave }) {
           </button>
         </div>
         <div className="module-body">
-             <div className="form-group">
-            <label>Documento:</label>
+          <div className="form-group">
+            <label htmlFor="document">Documento:</label>
             <input
+              id="document"
               type="text"
               name="document"
+              placeholder="Ingrese el documento"
               value={formDataOwners.document}
               onChange={handleChange}
               className={errors.document ? "input-error" : ""}
+              disabled={isSubmitting}
             />
             {errors.document && <span className="error-text">{errors.document}</span>}
           </div>
+          
           <div className="form-group">
-            <label>Nombre:</label>
+            <label htmlFor="name">Nombre Completo:</label>
             <input
+              id="name"
               type="text"
               name="name"
+              placeholder="Ingrese el nombre completo"
               value={formDataOwners.name}
               onChange={handleChange}
               className={errors.name ? "input-error" : ""}
+              disabled={isSubmitting}
             />
             {errors.name && <span className="error-text">{errors.name}</span>}
           </div>
+          
           <div className="form-group">
-            <label>Correo Electrónico:</label>
+            <label htmlFor="email">Correo Electrónico:</label>
             <input
+              id="email"
               type="email"
               name="email"
+              placeholder="ejemplo@correo.com"
               value={formDataOwners.email}
               onChange={handleChange}
               className={errors.email ? "input-error" : ""}
+              disabled={isSubmitting}
             />
             {errors.email && <span className="error-text">{errors.email}</span>}
           </div>
+          
           <div className="form-group">
-            <label>Teléfono:</label>
+            <label htmlFor="phone">Teléfono:</label>
             <input
+              id="phone"
               type="text"
               name="phone"
+              placeholder="Ingrese el teléfono"
               value={formDataOwners.phone}
               onChange={handleChange}
               className={errors.phone ? "input-error" : ""}
+              disabled={isSubmitting}
             />
             {errors.phone && <span className="error-text">{errors.phone}</span>}
           </div>
+          
           {errors.submit && (
             <div className="error-text submit-error">{errors.submit}</div>
           )}
@@ -152,7 +189,6 @@ export default function FormOwners({ isOpen, onClose, ownerToEdit, onSave }) {
               : formDataOwners.id
               ? "Actualizar"
               : "Guardar"}
-            Guardar
           </button>
         </div>
       </div>
