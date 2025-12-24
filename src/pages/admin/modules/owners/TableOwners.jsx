@@ -160,7 +160,7 @@ export default function TableOwners() {
                         aria-label={`Editar propietario ${owner.name}`}
                         onClick={() => handleOpenModal(owner)}
                       >
-                        <SquarePen />
+                        <SquarePen size={16} />
                       </button>
 
                       <button
@@ -169,7 +169,7 @@ export default function TableOwners() {
                         aria-label={`Eliminar propietario ${owner.name}`}
                         onClick={() => handleDeleteOwner(owner.id, owner.name)}
                       >
-                        <Trash />
+                         <Trash size={16} />
                       </button>
                     </td>
                   </tr>

@@ -23,7 +23,6 @@ export default function FormOwners({ isOpen, onClose, ownerToEdit, onSave }) {
         phone: ownerToEdit.phone || "",
       });
     } else {
-      // NO incluir id cuando es nuevo
       setDataOwners({ 
         document: "", 
         name: "", 
@@ -97,44 +96,47 @@ export default function FormOwners({ isOpen, onClose, ownerToEdit, onSave }) {
   
   return (
     <div className="modal-container" onClick={handleClose}>
-      <div className="module-container" onClick={(e) => e.stopPropagation()}>
+      <div className="module-container-owners" onClick={(e) => e.stopPropagation()}>
         <div className="module-header">
           <h2>{ownerToEdit ? "Editar Propietario" : "Agregar Propietario"}</h2>
           <button className="close-button" onClick={handleClose}>
             <CircleX size={20} />
           </button>
         </div>
-        <div className="module-body">
-          <div className="form-group">
-            <label htmlFor="document">Documento:</label>
-            <input
-              id="document"
-              type="text"
-              name="document"
-              placeholder="Ingrese el documento"
-              value={formDataOwners.document}
-              onChange={handleChange}
-              className={errors.document ? "input-error" : ""}
-              disabled={isSubmitting}
-            />
-            {errors.document && <span className="error-text">{errors.document}</span>}
+        <div className="module-body-owners">
+          <div className="group-dual">
+            <div className="form-group">
+              <label htmlFor="document">Documento:</label>
+              <input
+                id="document"
+                type="text"
+                name="document"
+                placeholder="Ingrese el documento"
+                value={formDataOwners.document}
+                onChange={handleChange}
+                className={errors.document ? "input-error" : ""}
+                disabled={isSubmitting}
+              />
+              {errors.document && <span className="error-text">{errors.document}</span>}
+            </div>
+
+            <div className="form-group">
+              <label htmlFor="name">Nombre Completo:</label>
+              <input
+                id="name"
+                type="text"
+                name="name"
+                placeholder="Ingrese el nombre completo"
+                value={formDataOwners.name}
+                onChange={handleChange}
+                className={errors.name ? "input-error" : ""}
+                disabled={isSubmitting}
+              />
+              {errors.name && <span className="error-text">{errors.name}</span>}
+            </div>
           </div>
-          
-          <div className="form-group">
-            <label htmlFor="name">Nombre Completo:</label>
-            <input
-              id="name"
-              type="text"
-              name="name"
-              placeholder="Ingrese el nombre completo"
-              value={formDataOwners.name}
-              onChange={handleChange}
-              className={errors.name ? "input-error" : ""}
-              disabled={isSubmitting}
-            />
-            {errors.name && <span className="error-text">{errors.name}</span>}
-          </div>
-          
+
+
           <div className="form-group">
             <label htmlFor="email">Correo Electrónico:</label>
             <input
@@ -149,12 +151,12 @@ export default function FormOwners({ isOpen, onClose, ownerToEdit, onSave }) {
             />
             {errors.email && <span className="error-text">{errors.email}</span>}
           </div>
-          
+
           <div className="form-group">
             <label htmlFor="phone">Teléfono:</label>
             <input
               id="phone"
-              type="text"
+              type="tel"
               name="phone"
               placeholder="Ingrese el teléfono"
               value={formDataOwners.phone}

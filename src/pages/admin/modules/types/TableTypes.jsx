@@ -148,7 +148,7 @@ export default function TableTypes() {
                         aria-label={`Editar tipo ${type.name}`}
                         onClick={() => handleOpenModal(type)}
                       >
-                        <SquarePen />
+                        <SquarePen size={16} />
                       </button>
 
                       <button
@@ -157,7 +157,7 @@ export default function TableTypes() {
                         aria-label={`Eliminar tipo ${type.name}`}
                         onClick={() => handleDeleteType(type.id, type.name)}
                       >
-                       <Trash />
+                       <Trash size={16} />
                       </button>
                     </td>
                   </tr>

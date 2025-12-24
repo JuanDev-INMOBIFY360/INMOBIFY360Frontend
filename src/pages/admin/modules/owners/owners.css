@@ -1,6 +1,27 @@
+.module-container-owners {
+  background-color: #ffffff;
+  border-radius: 12px;
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  width: 500px;
+  max-width: 90%;
+  padding: 15px;
+  height: auto;
+  position: relative;
+}
+/* Two-column layout for form body */
+.module-body-owners {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  padding: 8px 6px;
+}
+/* keep wrapper but let children participate in grid */
+.group-dual {
+  display: contents;
+}
 .form-group {
   display: block;
-  margin-bottom: 24px;
+  margin-bottom: 0; /* spacing controlled by grid gap */
   position: relative;
 }
 .form-group label {
@@ -40,4 +61,39 @@
   cursor: not-allowed;
   opacity: 0.6;
 }
+
+/* Error states */
+.input-error {
+  border-color: #ef4444;
+  box-shadow: 0 0 0 4px rgba(239, 68, 68, 0.06);
+}
+.error-text {
+  color: #ef4444;
+  font-size: 0.9rem;
+  margin-top: 6px;
+  display: block;
+}
+.submit-error {
+  grid-column: 1 / -1;
+  text-align: center;
+}
+
+/* Form actions should span both columns */
+.form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 12px;
+}
+
+@media (max-width: 640px) {
+  .module-body-owners {
+    grid-template-columns: 1fr;
+  }
+  .form-actions {
+    justify-content: center;
+  }
+}
+
 
