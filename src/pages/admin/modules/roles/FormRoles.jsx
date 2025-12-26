@@ -1,234 +1,147 @@
-import React, { useState, useEffect } from "react";
-import { X, Save, Eye, Plus, SquarePen, Trash, Repeat } from "lucide-react";
+import React, { useState, useEffect, useCallback } from "react";
+import {
+  X,
+  Save,
+  Eye,
+  Plus,
+  SquarePen,
+  Trash,
+  CheckCircle2,
+} from "lucide-react";
 import { getPermissions } from "../../../../services/permissionsService";
 import { getPrivileges } from "../../../../services/privilegesService";
 import { createRole, updateRole, getRole } from "../../../../services/RolesService";
+import "./Roles.css";
 
-export default function RoleFormModal({ isOpen, onClose, roleToEdit = null }) {
-  const [formData, setFormData] = useState({
-    id: null,
-    name: "",
-    description: ""
-  });
-  
+export default function RoleFormModal({ isOpen, onClose, roleToEdit = null, onSaved = null }) {
+  const [formData, setFormData] = useState({ id: null, name: "", description: "" });
   const [permissions, setPermissions] = useState([]);
   const [privileges, setPrivileges] = useState([]);
-  const [selectedPermissions, setSelectedPermissions] = useState({});
+  const [selected, setSelected] = useState({}); // { permissionId: { ACTION: true } }
   const [loading, setLoading] = useState(false);
   const [errors, setErrors] = useState({});
 
-  // Cargar permisos y privilegios al montar el componente
-  useEffect(() => {
-    if (isOpen) {
-      fetchPermissionsAndPrivileges();
-    }
-  }, [isOpen]);
+  // Ordered CRUD actions
+  const ACTION_ORDER = ["CREATE", "READ", "UPDATE", "DELETE"];
+  const ACTION_LABELS = { CREATE: "Crear", READ: "Ver", UPDATE: "Editar", DELETE: "Eliminar" };
 
-  // Si hay un rol para editar, cargar sus datos
-  useEffect(() => {
-    if (roleToEdit) {
-      loadRoleData();
-    } else {
-      resetForm();
-    }
-  }, [roleToEdit]);
-
-  const fetchPermissionsAndPrivileges = async () => {
+  const fetchData = useCallback(async () => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const [permissionsData, privilegesData] = await Promise.all([
-        getPermissions(),
-        getPrivileges()
-      ]);
+      const [perms, privs] = await Promise.all([getPermissions(), getPrivileges()]);
+      setPermissions(perms || []);
 
-      // permissionsData: array of Permissions (modules)
-      setPermissions(permissionsData);
+      // Filter and order privileges to standard CRUD
+      const uniqActions = Array.from(new Set((privs || []).map((p) => p.action))).filter((a) => ACTION_ORDER.includes(a));
+      uniqActions.sort((a, b) => ACTION_ORDER.indexOf(a) - ACTION_ORDER.indexOf(b));
+      const mapped = uniqActions.map((a) => ({ id: a, action: a, label: ACTION_LABELS[a] || a }));
 
-      // privilegesData: array of Privilege rows (many per permission). We need unique actions for columns.
-      // Only include standard CRUD actions in this specific order
-      const actionOrder = ['CREATE', 'READ', 'UPDATE', 'DELETE'];
-      // Get unique actions from DB, but restrict to allowed CRUD actions
-      const uniqActions = Array.from(new Set(privilegesData.map((p) => p.action)))
-        .filter((a) => actionOrder.includes(a));
-      uniqActions.sort((a, b) => actionOrder.indexOf(a) - actionOrder.indexOf(b));
-
-      const labelMap = {
-        READ: 'Ver',
-        CREATE: 'Crear',
-        UPDATE: 'Editar',
-        DELETE: 'Eliminar'
-      };
-
-      let mappedPrivileges = uniqActions.map((action) => ({
-        id: action,
-        action,
-        display_name: labelMap[action] || action,
-      }));
-
-      // Fallback to default set if there are no privileges in DB
-      if (mappedPrivileges.length === 0) {
-        mappedPrivileges = actionOrder.map((action) => ({
-          id: action,
-          action,
-          display_name: labelMap[action]
-        }));
-      }
-
-      setPrivileges(mappedPrivileges);
-
-    } catch (error) {
-      console.error("Error fetching permissions/privileges:", error);
-      alert("Error al cargar permisos y privilegios");
+      // Ensure fallback to CRUD if empty
+      setPrivileges(mapped.length ? mapped : ACTION_ORDER.map((a) => ({ id: a, action: a, label: ACTION_LABELS[a] })));
+    } catch (err) {
+      console.error("Error fetching permissions/privileges:", err);
+      setPermissions([]);
+      setPrivileges(ACTION_ORDER.map((a) => ({ id: a, action: a, label: ACTION_LABELS[a] })));
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
-  const loadRoleData = async () => {
+  useEffect(() => {
+    if (isOpen) fetchData();
+  }, [isOpen, fetchData]);
+
+  useEffect(() => {
+    if (roleToEdit) loadRole(roleToEdit.id);
+    else reset();
+  }, [roleToEdit]);
+
+  const loadRole = async (id) => {
+    setLoading(true);
     try {
-      setLoading(true);
-      const role = await getRole(roleToEdit.id);
-      setFormData({
-        id: role.id,
-        name: role.name || "",
-        description: role.description || ""
-      });
+      const role = await getRole(id);
+      setFormData({ id: role.id, name: role.name || "", description: role.description || "" });
 
-      // Build selectedPermissions map: { permissionId: { ACTION: true } }
+      // Normalize role.permissions to selected map
       const next = {};
       (role.permissions || []).forEach((perm) => {
         next[perm.id] = {};
-        (perm.privileges || []).forEach((priv) => {
-          next[perm.id][priv.action] = true;
+        (perm.privileges || []).forEach((p) => {
+          next[perm.id][p.action] = true;
         });
       });
-
-      setSelectedPermissions(next);
-
-    } catch (error) {
-      console.error("Error loading role data:", error);
-      alert("Error al cargar los datos del rol");
+      setSelected(next);
+    } catch (err) {
+      console.error("Error loading role:", err);
     } finally {
       setLoading(false);
     }
   };
 
-  const resetForm = () => {
-    setFormData({ name: "", description: "" });
-    setSelectedPermissions({});
+  const reset = () => {
+    setFormData({ id: null, name: "", description: "" });
+    setSelected({});
     setErrors({});
   };
 
-  const handleInputChange = (e) => {
+  const onChangeField = (e) => {
     const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-    
-    // Limpiar error del campo
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: "" }));
-    }
+    setFormData((s) => ({ ...s, [name]: value }));
+    if (errors[name]) setErrors((prev) => ({ ...prev, [name]: undefined }));
   };
 
-  const togglePermission = (permissionId, privilegeId) => {
-    setSelectedPermissions((prev) => ({
+  const toggleCell = (permissionId, action) => {
+    setSelected((prev) => ({
       ...prev,
-      [permissionId]: {
-        ...prev[permissionId],
-        [privilegeId]: !prev[permissionId]?.[privilegeId],
-      },
+      [permissionId]: { ...(prev[permissionId] || {}), [action]: !prev[permissionId]?.[action] },
     }));
   };
 
-  const toggleAllPrivileges = (permissionId) => {
-    const allSelected = privileges.every(
-      (priv) => selectedPermissions[permissionId]?.[priv.id]
-    );
-    
-    setSelectedPermissions((prev) => ({
-      ...prev,
-      [permissionId]: privileges.reduce(
-        (acc, priv) => ({
-          ...acc,
-          [priv.id]: !allSelected,
-        }),
-        {}
-      ),
-    }));
+  const toggleRowAll = (permissionId) => {
+    const all = privileges.every((p) => selected[permissionId]?.[p.id]);
+    setSelected((prev) => ({ ...prev, [permissionId]: Object.fromEntries(privileges.map((p) => [p.id, !all])) }));
   };
 
-  // Toggle a whole column (privilege) across all permissions
-  const togglePrivilegeColumn = (privilegeId) => {
-    const allSelected = permissions.every(
-      (perm) => selectedPermissions[perm.id]?.[privilegeId]
-    );
-
-    setSelectedPermissions((prev) => {
+  const toggleColAll = (action) => {
+    const all = permissions.every((perm) => selected[perm.id]?.[action]);
+    setSelected((prev) => {
       const next = { ...prev };
       permissions.forEach((perm) => {
-        next[perm.id] = { ...(next[perm.id] || {}), [privilegeId]: !allSelected };
+        next[perm.id] = { ...(next[perm.id] || {}) };
+        next[perm.id][action] = !all;
       });
       return next;
     });
   };
 
-  const isPrivilegeSelectedForAll = (privilegeId) => {
-    if (!permissions || permissions.length === 0) return false;
-    return permissions.every((perm) => selectedPermissions[perm.id]?.[privilegeId]);
+  const isColAll = (action) => permissions.length > 0 && permissions.every((perm) => selected[perm.id]?.[action]);
+
+  const validate = () => {
+    const errs = {};
+    if (!formData.name.trim()) errs.name = "Nombre del rol es obligatorio";
+
+    const hasAny = Object.values(selected).some((m) => Object.values(m).some(Boolean));
+    if (!hasAny) errs.permissions = "Debe seleccionar al menos un permiso";
+
+    setErrors(errs);
+    return Object.keys(errs).length === 0;
   };
 
-  const validateForm = () => {
-    const newErrors = {};
-
-    if (!formData.name.trim()) {
-      newErrors.name = "El nombre del rol es obligatorio";
-    }
-
-    // Validar que al menos un permiso esté seleccionado
-    const hasPermissions = Object.values(selectedPermissions).some((perms) =>
-      Object.values(perms).some((val) => val === true)
-    );
-
-    if (!hasPermissions) {
-      newErrors.permissions = "Debe seleccionar al menos un permiso";
-    }
-
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-
-    if (!validateForm()) {
-      return;
-    }
-
+  const submit = async (e) => {
+    e?.preventDefault();
+    if (!validate()) return;
+    setLoading(true);
     try {
-      setLoading(true);
+      const payload = { name: formData.name.trim(), description: formData.description.trim(), permissions: selected };
+      if (formData.id) await updateRole(formData.id, payload);
+      else await createRole(payload);
 
-      // Preparar datos para enviar
-      const roleData = {
-        name: formData.name.trim(),
-        description: formData.description.trim(),
-        permissions: selectedPermissions,
-      };
-
-      if (roleToEdit) {
-        await updateRole(roleToEdit.id, roleData);
-        console.log("Actualizando rol:", roleToEdit.id, roleData);
-        alert("Rol actualizado exitosamente");
-      } else {
-        await createRole(roleData);
-        console.log("Creando rol:", roleData);
-        alert("Rol creado exitosamente");
-      }
-
+      if (onSaved) onSaved();
       onClose();
-      resetForm();
-      // Aquí podrías llamar a una función para refrescar la tabla
-    } catch (error) {
-      console.error("Error saving role:", error);
-      alert("Error al guardar el rol");
+      reset();
+    } catch (err) {
+      console.error('Error saving role', err);
+      alert('Error al guardar el rol');
     } finally {
       setLoading(false);
     }
@@ -236,7 +149,7 @@ export default function RoleFormModal({ isOpen, onClose, roleToEdit = null }) {
 
   const handleClose = () => {
     if (!loading) {
-      resetForm();
+      reset();
       onClose();
     }
   };
@@ -244,193 +157,104 @@ export default function RoleFormModal({ isOpen, onClose, roleToEdit = null }) {
   if (!isOpen) return null;
 
   return (
-    <div className="modal-container" onClick={handleClose}>
-      <div className="module-container roles-modal" onClick={(e) => e.stopPropagation()}>
-        <form onSubmit={handleSubmit}>
-          {/* Header */}
-          <header className="module-header">
-            <div className="header-left">
-              <div className="header-icon" aria-hidden="true">🛡️</div>
-              <h2 className="modal-title">
-                {roleToEdit ? "Editar Rol" : "Crear Nuevo Rol"}
-              </h2>
+    <div className="modal-container" onClick={handleClose} role="dialog" aria-modal="true" aria-label={formData.id ? 'Editar rol' : 'Crear rol'}>
+      <div className="module-container" onClick={(e) => e.stopPropagation()}>
+        <form className="roles-form" onSubmit={submit} noValidate>
+          <header className="roles-header">
+            <div className="roles-title">
+              <div className="roles-icon" aria-hidden>
+                <CheckCircle2 size={28} />
+              </div>
+              <div>
+                <h2>{formData.id ? 'Editar Rol' : 'Crear Nuevo Rol'}</h2>
+                <p className="roles-sub">Define qué puede hacer este rol en cada módulo</p>
+              </div>
             </div>
-            <button
-              type="button"
-              onClick={handleClose}
-              disabled={loading}
-              className="close-button"
-              aria-label="Cerrar modal"
-            >
-              <X size={24} />
-            </button>
+            <div className="roles-actions">
+              <button type="button" className="icon-btn" onClick={handleClose} aria-label="Cerrar">
+                <X />
+              </button>
+            </div>
           </header>
 
-          {/* Body */}
-          <div className="module-body">
-            {/* Información básica */}
-            <section className="form-section">
-              <div className="form-group">
-                <label htmlFor="role-name" className="form-label required">
-                  Nombre del Rol
-                </label>
-                <input
-                  id="role-name"
-                  type="text"
-                  name="name"
-                  value={formData.name}
-                  onChange={handleInputChange}
-                  placeholder="Ej: Administrador, Editor, Visualizador"
-                  className={`form-input ${errors.name ? "error" : ""}`}
-                  disabled={loading}
-                  required
-                />
-                {errors.name && (
-                  <span className="error-message">{errors.name}</span>
-                )}
-              </div>
+          <div className="roles-body">
+            <section className="roles-info">
+              <label className="field">
+                <div className="field-label">Nombre <span className="required">*</span></div>
+                <input name="name" value={formData.name} onChange={onChangeField} className={`form-input ${errors.name ? 'input-error' : ''}`} placeholder="Ej: Administrador" disabled={loading} />
+                {errors.name && <div className="field-error">{errors.name}</div>}
+              </label>
 
-              <div className="form-group">
-                <label htmlFor="role-description" className="form-label">
-                  Descripción
-                </label>
-                <textarea
-                  id="role-description"
-                  name="description"
-                  value={formData.description}
-                  onChange={handleInputChange}
-                  placeholder="Describe las responsabilidades de este rol..."
-                  rows="3"
-                  className="form-textarea"
-                  disabled={loading}
-                />
-              </div>
+              <label className="field">
+                <div className="field-label">Descripción</div>
+                <textarea name="description" value={formData.description} onChange={onChangeField} className="form-textarea" rows={3} placeholder="Breve descripción" disabled={loading} />
+              </label>
             </section>
 
-            {/* Permisos y Privilegios */}
-            <section className="permissions-section">
-              <h3 className="section-title">Permisos y Privilegios</h3>
-              
-              {errors.permissions && (
-                <div className="error-message">{errors.permissions}</div>
-              )}
+            <section className="roles-perms">
+              <div className="perms-header">
+                <h3>Permisos y privilegios</h3>
+                <div className="perms-note">Selecciona por celda, por fila (Todos) o por columna</div>
+              </div>
 
-              {loading ? (
-                <div className="loading-state">Cargando permisos...</div>
-              ) : (
-                <div className="permissions-table-wrapper">
-                  <table className="permissions-table" style={{ minWidth: '720px' }} >
-                    <thead>
-                      <tr className="permissions-header">
-                        <th scope="col">Módulo</th>
-                        {privileges.map((priv) => (
-                          <th key={priv.id} scope="col">
-                            <div className="priv-header">
-                              <div className="priv-label"><strong>{priv.display_name}</strong></div>
-                              <div className="priv-icon" aria-hidden>
-                                {(() => {
-                                  switch (priv.action) {
-                                    case 'READ':
-                                      return <Eye size={18} />;
-                                    case 'CREATE':
-                                      return <Plus size={18} />;
-                                    case 'UPDATE':
-                                      return <SquarePen size={18} />;
-                                    case 'DELETE':
-                                      return <Trash size={18} />;
-                                    default:
-                                      return null;
-                                  }
-                                })()}
-                              </div>
-                              <label className="switch header-switch" title={`Seleccionar todos ${priv.display_name}`}>
-                                <input
-                                  type="checkbox"
-                                  checked={isPrivilegeSelectedForAll(priv.id)}
-                                  onChange={() => togglePrivilegeColumn(priv.id)}
-                                  aria-label={`Seleccionar todos ${priv.display_name}`}
-                                />
-                                <span className="slider" />
-                              </label>
+              {errors.permissions && <div className="field-error">{errors.permissions}</div>}
+
+              <div className="permissions-table-wrapper">
+                <table className="permissions-table" role="table" aria-label="Matriz de permisos">
+                  <thead>
+                    <tr>
+                      <th className="col-module">Módulo</th>
+                      {privileges.map((p) => (
+                        <th key={p.id} className="col-action">
+                          <div className="col-head">
+                            <div className="col-label">{p.label}</div>
+                            <div className="col-icon" aria-hidden>
+                              {p.action === 'READ' && <Eye size={16} />}
+                              {p.action === 'CREATE' && <Plus size={16} />}
+                              {p.action === 'UPDATE' && <SquarePen size={16} />}
+                              {p.action === 'DELETE' && <Trash size={16} />}
                             </div>
-                          </th>
-                        ))}
-                        <th scope="col">Todos</th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {permissions.map((perm) => (
-                        <tr key={perm.id}>
-                          <td>
-                            <strong>{perm.name || perm.display_name}</strong>
-                          </td>
-                          {privileges.map((priv) => (
-                            <td key={priv.id}>
-                              <label className="switch">
-                                <input
-                                  type="checkbox"
-                                  checked={
-                                    selectedPermissions[perm.id]?.[priv.id] ||
-                                    false
-                                  }
-                                  onChange={() =>
-                                    togglePermission(perm.id, priv.id)
-                                  }
-                                  disabled={loading}
-                                  aria-label={`${perm.name || perm.display_name} - ${priv.display_name}`}
-                                />
-                                <span className="slider" />
-                              </label>
-                            </td>
-                          ))}
-                          <td>
+                            <label className="header-switch">
+                              <input type="checkbox" checked={isColAll(p.id)} onChange={() => toggleColAll(p.id)} aria-label={`Seleccionar todos ${p.label}`} />
+                              <span className="slider" />
+                            </label>
+                          </div>
+                        </th>
+                      ))}
+
+                      <th className="col-all">Todos</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {permissions.map((perm) => (
+                      <tr key={perm.id}>
+                        <td className="mod-name">{perm.displayName || perm.name}</td>
+                        {privileges.map((p) => (
+                          <td key={p.id} className="cell-check">
                             <label className="switch">
-                              <input
-                                type="checkbox"
-                                checked={privileges.every(
-                                  (priv) =>
-                                    selectedPermissions[perm.id]?.[priv.id]
-                                )}
-                                onChange={() => toggleAllPrivileges(perm.id)}
-                                disabled={loading}
-                                aria-label={`Todos los privilegios de ${perm.name || perm.display_name}`}
-                              />
+                              <input type="checkbox" checked={!!selected[perm.id]?.[p.id]} onChange={() => toggleCell(perm.id, p.id)} aria-label={`${perm.name} - ${p.label}`} />
                               <span className="slider" />
                             </label>
                           </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
-              )}
+                        ))}
+
+                        <td className="cell-check">
+                          <label className="switch">
+                            <input type="checkbox" checked={privileges.every((p) => selected[perm.id]?.[p.id])} onChange={() => toggleRowAll(perm.id)} aria-label={`Todos los privilegios de ${perm.name}`} />
+                            <span className="slider" />
+                          </label>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
             </section>
           </div>
 
-          {/* Footer */}
-          <footer className="module-footer">
-            <button
-              type="button"
-              onClick={handleClose}
-              disabled={loading}
-              className="btn-cancel"
-            >
-              Cancelar
-            </button>
-            <button
-              type="submit"
-              disabled={loading}
-              className="btn-submit"
-            >
-              {loading ? (
-                "Guardando..."
-              ) : (
-                <>
-                  <Save size={18} />
-                  {roleToEdit ? "Actualizar Rol" : "Crear Rol"}
-                </>
-              )}
-            </button>
+          <footer className="roles-footer">
+            <button type="button" className="btn btn-ghost" onClick={handleClose} disabled={loading}>Cancelar</button>
+            <button type="submit" className="btn btn-primary" disabled={loading}>{loading ? 'Guardando...' : (<><Save size={16} /> {formData.id ? 'Actualizar rol' : 'Crear rol'}</>)}</button>
           </footer>
         </form>
       </div>
