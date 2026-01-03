@@ -2,9 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { ChevronDown, X } from 'lucide-react';
 import { getProperties } from '../../../services/propertyService';
-import { getCities } from '../../../services/CitiesService';
-import { getDepartments } from '../../../services/DepartmentsService';
-import { getNeighborhoods } from '../../../services/NeighborhoodsService';
+
 import { normalizeForSearch } from '../../../utils/removeAccents';
 import './SearchResults.css';
 

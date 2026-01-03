@@ -3,7 +3,7 @@ import api from './api';
 export const getTypes = async () => {
   try {
     const res = await api.get('/api/types');
-    return res.data;
+    return res.data.data || res.data;
   } catch (err) {
     console.error('❌ Error fetching types:', err);
     throw err;

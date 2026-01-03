@@ -1,12 +1,12 @@
 import React, { useState, useEffect } from "react";
-import "./Roles.css";
-import { getRoles, deleteRole } from "../../../../services/RolesService";
+import { getRoles, createRole, updateRole, deleteRole } from "../../../../services/RolesService";
+import FormRoles from "./FormRoles";
+import "../../GlobalStyles/globalStyles.css";
 import { SquarePen, Trash } from "lucide-react";
-import RoleFormModal from "./FormRoles.jsx";
 
 export default function TableRoles() {
-  const [roles, setRoles] = useState([]); 
-  const [filteredRoles, setFilteredRoles] = useState([]);
+  const [roles, setRoles] = useState([]);
+  const [filtered, setFiltered] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -17,26 +17,25 @@ export default function TableRoles() {
   }, []);
 
   useEffect(() => {
-    const filtered = roles.filter((r) =>
-      r.name?.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-    setFilteredRoles(filtered);
+    const f = roles.filter(r => r.name.toLowerCase().includes(searchTerm.toLowerCase()) || (r.description || "").toLowerCase().includes(searchTerm.toLowerCase()));
+    setFiltered(f);
   }, [searchTerm, roles]);
 
   const fetchRoles = async () => {
+    setLoading(true);
     try {
-      setLoading(true); 
       const data = await getRoles();
       setRoles(data);
-    } catch (error) {
-      console.error("Error fetching roles:", error);
-      alert("Error al cargar los roles");
+      setFiltered(data);
+    } catch (err) {
+      console.error("Error fetching roles", err);
+      alert("Error cargando roles");
     } finally {
-      setLoading(false); 
+      setLoading(false);
     }
   };
 
-   const handleOpenModal = (role = null) => {
+  const handleOpenModal = (role = null) => {
     setRoleToEdit(role);
     setIsModalOpen(true);
   };
@@ -44,98 +43,86 @@ export default function TableRoles() {
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setRoleToEdit(null);
-    fetchRoles(); // Refrescar la tabla
   };
 
-  const handleDelete = async (id) => {
-    if (!window.confirm('¿Deseas eliminar este rol? Esta acción no se puede deshacer.')) return;
+  const handleSave = async (id, payload) => {
+    if (id) {
+      await updateRole(id, payload);
+    } else {
+      await createRole(payload);
+    }
+    await fetchRoles();
+  };
+
+  const handleDelete = async (id, name) => {
+    if (!window.confirm(`¿Deseas eliminar el rol "${name}"?`)) return;
     try {
-      setLoading(true);
       await deleteRole(id);
       await fetchRoles();
-    } catch (error) {
-      console.error("Error deleting role:", error);
-      alert("Error al eliminar el rol");
-    } finally {
-      setLoading(false);
+    } catch (err) {
+      console.error(err);
+      alert("Error eliminando rol");
     }
   };
 
-  if (loading) return <div>Cargando...</div>;
+  if (loading) return <p>Cargando roles...</p>;
 
   return (
     <>
-      <section className="container-module">
+      <section className="container-module" aria-labelledby="roles-title">
         <header className="header-module">
-          <h1 className="title-module">Gestión de Roles</h1>
+          <h1 id="roles-title" className="title-module">Gestión de Roles</h1>
         </header>
 
-        <div className="controls">
-          <div className="search-container">
+        <div className="controls" role="toolbar" aria-label="Controles de tabla">
+          <div>
             <input
-              id="search-roles"
-              type="text"
+              type="search"
               placeholder="Buscar roles..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="search-input-module"
             />
           </div>
-          <button
-            type="button"
-            className="btn-add"
-            aria-label="Agregar Rol"
-            onClick={() => handleOpenModal()}
-          >
-            <span className="btn-add-icon" aria-hidden="true">
-              +
-            </span>
+
+          <button type="button" className="btn-add" onClick={() => handleOpenModal()}>
+            <span className="btn-add-icon">+</span>
             Agregar Rol
           </button>
         </div>
+
         <div className="table-wrapper">
           <table className="table-module">
             <colgroup>
-              <col className="col-id" />
+              <col className="col-name" />
               <col className="col-name" />
               <col className="col-actions" />
             </colgroup>
+
             <thead>
               <tr>
-                <th scope="col">ID</th>
-                <th scope="col">Nombre del Rol</th>
-                <th scope="col">Acciones</th>
+                <th>Nombre</th>
+                <th>Descripción</th>
+                <th>Acciones</th>
               </tr>
             </thead>
+
             <tbody>
-              {filteredRoles.length === 0 ? (
+              {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan="3" className="no-data-module">
-                    {searchTerm
-                      ? `No hay roles que coincidan con "${searchTerm}"`
-                      : "No hay roles registrados"}
-                  </td>
+                  <td colSpan="3" className="no-data-module">{searchTerm ? `No hay roles que coincidan con "${searchTerm}"` : "No hay roles registrados"}</td>
                 </tr>
               ) : (
-                filteredRoles.map((role) => (
+                filtered.map((role) => (
                   <tr key={role.id}>
-                    <td>{role.id}</td>
                     <td>{role.name}</td>
-                    <td>
-                      <button
-                        type="button"
-                        className="btn-edit"
-                        aria-label={`Editar rol ${role.name}`}
-                        onClick={() => handleOpenModal(role)}
-                      >
+                    <td>{role.description || '—'}</td>
+                    <td className="col-actions">
+                      <button type="button" className="btn-edit" aria-label={`Editar rol ${role.name}`} onClick={() => handleOpenModal(role)}>
                         <SquarePen size={16} />
                       </button>
-                      <button
-                        type="button"
-                        className="btn-delete"
-                        aria-label={`Eliminar rol ${role.name}`}
-                        onClick={() => handleDelete(role.id)}
-                      >
+
+                      <button type="button" className="btn-delete" aria-label={`Eliminar rol ${role.name}`} onClick={() => handleDelete(role.id, role.name)}>
                         <Trash size={16} />
                       </button>
                     </td>
@@ -146,10 +133,12 @@ export default function TableRoles() {
           </table>
         </div>
       </section>
-       <RoleFormModal
+
+      <FormRoles
         isOpen={isModalOpen}
         onClose={handleCloseModal}
         roleToEdit={roleToEdit}
+        onSave={handleSave}
       />
     </>
   );

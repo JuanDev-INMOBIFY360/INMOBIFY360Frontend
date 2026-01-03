@@ -3,7 +3,7 @@ import api from './api';
 export const getOwners = async () => {
   try {
     const res = await api.get('/api/owners');
-    return res.data;
+    return res.data.data;
   } catch (err) {
     console.error('❌ Error fetching owners:', err);
     throw err;
@@ -12,7 +12,7 @@ export const getOwners = async () => {
 
 export const getOwner = async (id) => {
   const res = await api.get(`/api/owners/${id}`);
-  return res.data;
+  return res.data.data;
 };
 
 export const createOwner = async (payload) => {

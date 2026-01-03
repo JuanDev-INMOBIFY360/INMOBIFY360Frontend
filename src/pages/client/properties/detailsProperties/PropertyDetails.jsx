@@ -34,7 +34,6 @@ const PropertyDetail = ({ propertyId }) => {
       habitaciones: 2,
       banos: 2,
       parqueaderos: 0,
-      estrato: 3,
       antiguedad: 15,
       administracion: 150000,
       direccion: "Carrera 68D # 40 0",

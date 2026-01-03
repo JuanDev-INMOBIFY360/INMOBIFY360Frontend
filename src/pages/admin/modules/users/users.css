@@ -1,0 +1,163 @@
+.user-module {
+  width: 560px;
+  max-width: 95%;
+  padding: 14px;
+  border-radius: 12px;
+  background: #ffffff;
+}
+
+.user-module .module-body {
+  display: block; /* rows define their own grid */
+  padding: 8px 6px;
+}
+
+.user-module .row-three {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.user-module .row-two {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.user-module .form-group {
+  display: block;
+  margin-bottom: 0; /* spacing controlled by grid gap */
+}
+
+.user-module .form-group label {
+  display: block;
+  margin-bottom: 8px;
+  font-weight: 600;
+  color: #2d3748;
+  font-size: 0.95rem;
+  letter-spacing: 0.3px;
+}
+
+.user-module input,
+.user-module select,
+.user-module textarea {
+  width: 100%;
+  padding: 12px 14px;
+  border: 2px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 15px;
+  margin-bottom: 2px;
+  transition: all 0.2s ease;
+  background-color: #f9fafb;
+  color: #2d3748;
+}
+
+.user-module input:focus,
+.user-module select:focus,
+.user-module textarea:focus {
+  outline: none;
+  border-color: #4299e1;
+  box-shadow: 0 0 0 4px rgba(66, 153, 225, 0.12);
+  background-color: #ffffff;
+}
+
+/* Toggle switch */
+.switch {
+  position: relative;
+  display: inline-block;
+  width: 46px;
+  height: 26px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switch .slider {
+  position: absolute;
+  cursor: pointer;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: #e6eef8;
+  transition: 0.3s;
+  border-radius: 999px;
+  border: 1px solid #dbeafe;
+}
+
+.switch .slider:before {
+  position: absolute;
+  content: "";
+  height: 20px;
+  width: 20px;
+  left: 3px;
+  top: 2px;
+  background: #fff;
+  border-radius: 50%;
+  transition: 0.3s;
+  box-shadow: 0 2px 6px rgba(12, 24, 40, 0.08);
+}
+
+.switch input:checked + .slider {
+  background: linear-gradient(135deg, #00A7FF 0%, #0077cc 100%);
+  border-color: rgba(0, 119, 204, 0.6);
+}
+
+.switch input:checked + .slider:before {
+  transform: translateX(20px);
+}
+
+.user-module .form-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  padding-top: 12px;
+}
+
+.user-module .checkbox-inline {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+@media (max-width: 640px) {
+  .user-module .row-three,
+  .user-module .row-two {
+    grid-template-columns: 1fr;
+  }
+  .user-module .form-actions {
+    justify-content: center;
+  }
+}
+
+/* Password toggle */
+.user-module .password-wrapper {
+  position: relative;
+}
+.user-module .password-wrapper input {
+  padding-right: 40px; /* espacio para el icono */
+}
+.user-module .password-toggle {
+  position: absolute;
+  right: 10px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: none;
+  background: transparent;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px;
+  color: #4a5568;
+}
+.user-module .password-toggle:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.user-module .password-toggle svg {
+  pointer-events: none;
+} 

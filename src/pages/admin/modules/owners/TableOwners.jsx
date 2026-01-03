@@ -16,12 +16,17 @@ export default function TableOwners() {
   }, []);
 
   useEffect(() => {
+    if (!Array.isArray(owners)) {
+      setFilteredOwners([]);
+      return;
+    }
+    const term = searchTerm.toLowerCase();
     const filtered = owners.filter(
       (o) =>
-        o.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (o.document || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (o.email || "").toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (o.phone || "").toLowerCase().includes(searchTerm.toLowerCase())
+        (o.name || "").toLowerCase().includes(term) ||
+        (o.document || "").toLowerCase().includes(term) ||
+        (o.email || "").toLowerCase().includes(term) ||
+        (o.phone || "").toLowerCase().includes(term)
     );
     setFilteredOwners(filtered);
   }, [searchTerm, owners]);
@@ -29,8 +34,18 @@ export default function TableOwners() {
   const fetchOwners = async () => {
     try {
       const data = await getOwners();
-      setOwners(data);
-      setFilteredOwners(data);
+      const list = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.data)
+        ? data.data
+        : Array.isArray(data?.owners)
+        ? data.owners
+        : [];
+      if (!Array.isArray(data) && list.length === 0) {
+        console.warn("getOwners returned unexpected shape:", data);
+      }
+      setOwners(list);
+      setFilteredOwners(list);
     } catch (error) {
       console.error("Error fetching owners:", error);
       alert("Error al cargar los propietarios");
