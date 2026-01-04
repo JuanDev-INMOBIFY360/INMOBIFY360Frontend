@@ -11,7 +11,9 @@ import TableOwners from "./pages/admin/modules/owners/TableOwners.jsx";
 import TableRoles from "./pages/admin/modules/roles/TableRoles.jsx";
 import TableUsers from "./pages/admin/modules/users/TableUsers.jsx";
 import TableTypes from "./pages/admin/modules/types/TableTypes.jsx";
-
+import TableProperty from "./pages/admin/modules/property/TableProperty.jsx";
+import TableCommonArea from "./pages/admin/modules/commonArea/TableCommonArea.jsx";
+import TableNearbyPlace from "./pages/admin/modules/nearbyPlace/nearbyPlace.jsx";
 /* ===== PUBLIC ===== */
 import PublicLayout from "./layaouts/PublicLayout";
 import Home from "./pages/client/landing/home";
@@ -79,6 +81,31 @@ function App() {
               }
             />
 
+            <Route
+              path="properties"
+              element={
+                <ProtectedRoute requiredModule="property">
+                  <TableProperty />
+                </ProtectedRoute>
+              }
+
+            />
+            <Route
+              path="common-areas"
+              element={
+                <ProtectedRoute requiredModule="commonarea">
+                  <TableCommonArea />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="nearby-places"
+              element={
+                <ProtectedRoute requiredModule="nearbyplace">
+                  <TableNearbyPlace />
+                </ProtectedRoute>
+              }
+            />  
             <Route
               path="types"
               element={

@@ -46,6 +46,18 @@ export const ADMIN_MODULES = [
     Icon: Archive,
     moduleName: "typeProperty",
   },
+  {
+    to: "/admin/common-areas",
+    label: "Áreas Comunes",
+    Icon: Archive,
+    moduleName: "commonArea",
+  },
+  {
+    to: "/admin/nearby-places",
+    label: "Lugares Cercanos",
+    moduleName: "nearbyplace",
+    Icon: Archive,
+  },
 ];
 
 /**
