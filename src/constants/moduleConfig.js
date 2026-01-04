@@ -1,11 +1,11 @@
-
-
 import {
   Home,
   Box,
   Users,
   Shield,
   Archive,
+  MapPin,
+  Fullscreen
 } from "lucide-react";
 
 export const ADMIN_MODULES = [
@@ -44,19 +44,19 @@ export const ADMIN_MODULES = [
     to: "/admin/types",
     label: "Tipos",
     Icon: Archive,
-    moduleName: "typeProperty",
+    moduleName: "typeProperty", 
   },
   {
     to: "/admin/common-areas",
     label: "Áreas Comunes",
-    Icon: Archive,
-    moduleName: "commonArea",
+    Icon: Fullscreen,
+    moduleName: "commonArea", 
   },
   {
     to: "/admin/nearby-places",
     label: "Lugares Cercanos",
-    moduleName: "nearbyplace",
-    Icon: Archive,
+    Icon: MapPin,
+    moduleName: "nearbyPlace",
   },
 ];
 

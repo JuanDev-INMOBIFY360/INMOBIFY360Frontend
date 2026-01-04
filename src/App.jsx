@@ -93,7 +93,7 @@ function App() {
             <Route
               path="common-areas"
               element={
-                <ProtectedRoute requiredModule="commonarea">
+                <ProtectedRoute requiredModule="commonArea">
                   <TableCommonArea />
                 </ProtectedRoute>
               }
@@ -101,7 +101,7 @@ function App() {
             <Route
               path="nearby-places"
               element={
-                <ProtectedRoute requiredModule="nearbyplace">
+                <ProtectedRoute requiredModule="nearbyPlace">
                   <TableNearbyPlace />
                 </ProtectedRoute>
               }

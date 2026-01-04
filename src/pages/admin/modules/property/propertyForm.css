@@ -1,0 +1,35 @@
+.property-form {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.steps-header {
+  display: flex;
+  gap: 8px;
+}
+
+.step-item {
+  flex: 1;
+  padding: 10px;
+  text-align: center;
+  background: #f1f5f9;
+  border-radius: 8px;
+  font-weight: 600;
+}
+
+.step-item.active {
+  background: linear-gradient(135deg, #0ea5e9, #facc15);
+  color: #0f172a;
+}
+
+.form-step {
+  display: grid;
+  gap: 12px;
+}
+
+.form-actions {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}

@@ -1,9 +1,11 @@
 import React, { useState, useEffect } from "react";
-import { CircleX, Upload, X, Star } from "lucide-react";
+import { CircleX, Upload, X, Star, Plus, Trash2 } from "lucide-react";
 import { getCountries, getDepartments } from "../../../../services/LocationsService";
 import { getOwners } from "../../../../services/OwnersService";
 import { getTypes } from "../../../../services/TypesService";
 import { fileToBase64 } from "../../../../services/propertyService";
+import { getCommonAreas } from "../../../../services/commonArea";
+import { getNearbyPlaces } from "../../../../services/nearbyPlace";
 import "./property.css";
 
 export default function FormProperty({ isOpen, onClose, propertyToEdit, onSave }) {
@@ -18,15 +20,9 @@ export default function FormProperty({ isOpen, onClose, propertyToEdit, onSave }
     banos: "",
     parqueaderos: "",
     areaConstruida: "",
-    areaPrivada: "",
     ciudad: "",
     barrio: "",
     direccion: "",
-    latitud: "",
-    longitud: "",
-    estado: "AVAILABLE",
-    publicada: false,
-    destacada: false,
     countryId: "",
     departmentId: "",
     ownerId: "",
@@ -39,6 +35,12 @@ export default function FormProperty({ isOpen, onClose, propertyToEdit, onSave }
   const [departments, setDepartments] = useState([]);
   const [owners, setOwners] = useState([]);
   const [types, setTypes] = useState([]);
+  const [commonAreas, setCommonAreas] = useState([]);
+  const [selectedCommonAreas, setSelectedCommonAreas] = useState([]);
+  const [nearbyPlaces, setNearbyPlaces] = useState([]);
+  const [propertyNearby, setPropertyNearby] = useState([]);
+  const [selectedNearby, setSelectedNearby] = useState("");
+  const [distance, setDistance] = useState("");
   const [errors, setErrors] = useState({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -46,14 +48,18 @@ export default function FormProperty({ isOpen, onClose, propertyToEdit, onSave }
   useEffect(() => {
     const loadData = async () => {
       try {
-        const [countriesData, ownersData, typesData] = await Promise.all([
+        const [countriesData, ownersData, typesData, commonAreasData, nearbyData] = await Promise.all([
           getCountries(),
           getOwners(),
           getTypes(),
+          getCommonAreas(),
+          getNearbyPlaces(),
         ]);
         setCountries(countriesData);
         setOwners(ownersData);
         setTypes(typesData);
+        setCommonAreas(commonAreasData);
+        setNearbyPlaces(nearbyData);
       } catch (error) {
         console.error("Error cargando datos:", error);
       }
@@ -69,6 +75,7 @@ export default function FormProperty({ isOpen, onClose, propertyToEdit, onSave }
         .catch(console.error);
     } else {
       setDepartments([]);
+      setFormData(prev => ({ ...prev, departmentId: "" }));
     }
   }, [formData.countryId]);
 
@@ -91,15 +98,9 @@ export default function FormProperty({ isOpen, onClose, propertyToEdit, onSave }
       banos: "",
       parqueaderos: "",
       areaConstruida: "",
-      areaPrivada: "",
       ciudad: "",
       barrio: "",
       direccion: "",
-      latitud: "",
-      longitud: "",
-      estado: "AVAILABLE",
-      publicada: false,
-      destacada: false,
       countryId: "",
       departmentId: "",
       ownerId: "",
@@ -107,6 +108,10 @@ export default function FormProperty({ isOpen, onClose, propertyToEdit, onSave }
     });
     setImages([]);
     setImagePreviews([]);
+    setSelectedCommonAreas([]);
+    setPropertyNearby([]);
+    setSelectedNearby("");
+    setDistance("");
     setErrors({});
     setIsSubmitting(false);
   };
@@ -122,13 +127,47 @@ export default function FormProperty({ isOpen, onClose, propertyToEdit, onSave }
     }
   };
 
-  /**
-   * Manejar selección de imágenes
-   */
+  const toggleCommonArea = (id) => {
+    setSelectedCommonAreas((prev) =>
+      prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id]
+    );
+  };
+
+  const addNearbyPlace = () => {
+    if (!selectedNearby || !distance || parseFloat(distance) <= 0) {
+      setErrors({ nearby: "Selecciona un lugar y una distancia válida" });
+      return;
+    }
+
+    const alreadyAdded = propertyNearby.find(
+      (p) => p.nearbyPlaceId === Number(selectedNearby)
+    );
+
+    if (alreadyAdded) {
+      setErrors({ nearby: "Este lugar ya fue agregado" });
+      return;
+    }
+
+    setPropertyNearby((prev) => [
+      ...prev,
+      {
+        nearbyPlaceId: Number(selectedNearby),
+        distance: parseFloat(distance),
+      },
+    ]);
+
+    setSelectedNearby("");
+    setDistance("");
+    setErrors((prev) => ({ ...prev, nearby: "" }));
+  };
+
+  const removeNearbyPlace = (nearbyPlaceId) => {
+    setPropertyNearby((prev) => prev.filter((p) => p.nearbyPlaceId !== nearbyPlaceId));
+  };
+
   const handleImageChange = async (e) => {
     const files = Array.from(e.target.files);
     
-    // Validar cantidad
     if (images.length + files.length > 20) {
       setErrors({ images: "Máximo 20 imágenes permitidas" });
       return;
@@ -138,13 +177,11 @@ export default function FormProperty({ isOpen, onClose, propertyToEdit, onSave }
     const newPreviews = [];
 
     for (const file of files) {
-      // Validar tipo
       if (!file.type.startsWith("image/")) {
         setErrors({ images: "Solo se permiten archivos de imagen" });
         continue;
       }
 
-      // Validar tamaño (5MB)
       if (file.size > 5 * 1024 * 1024) {
         setErrors({ images: "Cada imagen debe ser menor a 5MB" });
         continue;
@@ -154,7 +191,7 @@ export default function FormProperty({ isOpen, onClose, propertyToEdit, onSave }
         const base64 = await fileToBase64(file);
         validFiles.push({
           base64,
-          isPrimary: images.length === 0 && validFiles.length === 0, // Primera imagen es primaria
+          isPrimary: images.length === 0 && validFiles.length === 0,
           order: images.length + validFiles.length,
         });
         newPreviews.push(URL.createObjectURL(file));
@@ -168,14 +205,10 @@ export default function FormProperty({ isOpen, onClose, propertyToEdit, onSave }
     setErrors((prev) => ({ ...prev, images: "" }));
   };
 
-  /**
-   * Eliminar una imagen
-   */
   const removeImage = (index) => {
     const newImages = images.filter((_, i) => i !== index);
     const newPreviews = imagePreviews.filter((_, i) => i !== index);
 
-    // Si se elimina la primaria, marcar la primera como primaria
     if (images[index].isPrimary && newImages.length > 0) {
       newImages[0].isPrimary = true;
     }
@@ -184,9 +217,6 @@ export default function FormProperty({ isOpen, onClose, propertyToEdit, onSave }
     setImagePreviews(newPreviews);
   };
 
-  /**
-   * Establecer imagen como primaria
-   */
   const setPrimary = (index) => {
     const newImages = images.map((img, i) => ({
       ...img,
@@ -195,9 +225,6 @@ export default function FormProperty({ isOpen, onClose, propertyToEdit, onSave }
     setImages(newImages);
   };
 
-  /**
-   * Validar formulario
-   */
   const validate = () => {
     const newErrors = {};
 
@@ -220,32 +247,27 @@ export default function FormProperty({ isOpen, onClose, propertyToEdit, onSave }
     return Object.keys(newErrors).length === 0;
   };
 
-  /**
-   * Enviar formulario
-   */
   const handleSubmit = async () => {
     if (!validate()) return;
 
     setIsSubmitting(true);
 
     try {
-     const payload = {
-  ...formData,
-  precio: parseFloat(formData.precio),
-  habitaciones: formData.habitaciones ? parseInt(formData.habitaciones) : undefined,
-  banos: formData.banos ? parseInt(formData.banos) : undefined,
-  parqueaderos: formData.parqueaderos ? parseInt(formData.parqueaderos) : undefined,
-  areaConstruida: formData.areaConstruida ? parseFloat(formData.areaConstruida) : undefined,
-  areaPrivada: formData.areaPrivada ? parseFloat(formData.areaPrivada) : undefined,
-  ...(formData.latitud && { latitud: parseFloat(formData.latitud) }),
-  ...(formData.longitud && { longitud: parseFloat(formData.longitud) }),
-  countryId: parseInt(formData.countryId),
-  departmentId: parseInt(formData.departmentId),
-  ownerId: parseInt(formData.ownerId),
-  typePropertyId: parseInt(formData.typePropertyId),
-  images,
-};
-
+      const payload = {
+        ...formData,
+        commonAreaIds: selectedCommonAreas,
+        nearbyPlaces: propertyNearby,
+        precio: parseFloat(formData.precio),
+        habitaciones: formData.habitaciones ? parseInt(formData.habitaciones) : undefined,
+        banos: formData.banos ? parseInt(formData.banos) : undefined,
+        parqueaderos: formData.parqueaderos ? parseInt(formData.parqueaderos) : undefined,
+        areaConstruida: formData.areaConstruida ? parseFloat(formData.areaConstruida) : undefined,
+        countryId: parseInt(formData.countryId),
+        departmentId: parseInt(formData.departmentId),
+        ownerId: parseInt(formData.ownerId),
+        typePropertyId: parseInt(formData.typePropertyId),
+        images,
+      };
 
       await onSave(payload);
       onClose();
@@ -319,7 +341,7 @@ export default function FormProperty({ isOpen, onClose, propertyToEdit, onSave }
             </div>
           </section>
 
-          {/* Detalles de Operación */}
+          {/* Operación y Precio */}
           <section className="form-section">
             <h3 className="section-title">Operación y Precio</h3>
             
@@ -413,9 +435,7 @@ export default function FormProperty({ isOpen, onClose, propertyToEdit, onSave }
                   placeholder="1"
                 />
               </div>
-            </div>
 
-            <div className="form-row">
               <div className="form-group">
                 <label htmlFor="areaConstruida">Área Construida (m²)</label>
                 <input
@@ -427,20 +447,6 @@ export default function FormProperty({ isOpen, onClose, propertyToEdit, onSave }
                   onChange={handleChange}
                   disabled={isSubmitting}
                   placeholder="85.5"
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="areaPrivada">Área Privada (m²)</label>
-                <input
-                  id="areaPrivada"
-                  name="areaPrivada"
-                  type="number"
-                  step="0.01"
-                  value={formData.areaPrivada}
-                  onChange={handleChange}
-                  disabled={isSubmitting}
-                  placeholder="80.0"
                 />
               </div>
             </div>
@@ -535,7 +541,7 @@ export default function FormProperty({ isOpen, onClose, propertyToEdit, onSave }
             </div>
           </section>
 
-          {/* Relaciones */}
+          {/* Información Adicional */}
           <section className="form-section">
             <h3 className="section-title">Información Adicional</h3>
             
@@ -579,51 +585,135 @@ export default function FormProperty({ isOpen, onClose, propertyToEdit, onSave }
                 </select>
                 {errors.typePropertyId && <span className="error-text">{errors.typePropertyId}</span>}
               </div>
-            </div>
 
+             
+            </div>
+          </section>
+
+          {/* Áreas Comunes */}
+          <section className="form-section">
+            <h3 className="section-title">Áreas Comunes</h3>
+            <div className="checkbox-group" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+              {commonAreas.map((area) => (
+                <label key={area.id} className="checkbox-label">
+                  <input
+                    type="checkbox"
+                    checked={selectedCommonAreas.includes(area.id)}
+                    onChange={() => toggleCommonArea(area.id)}
+                    disabled={isSubmitting}
+                  />
+                  <span>{area.name}</span>
+                </label>
+              ))}
+            </div>
+          </section>
+
+          {/* Lugares Cercanos */}
+          <section className="form-section">
+            <h3 className="section-title">Lugares Cercanos</h3>
+            
             <div className="form-row">
               <div className="form-group">
-                <label htmlFor="estado">Estado</label>
+                <label htmlFor="nearbyPlace">Lugar</label>
                 <select
-                  id="estado"
-                  name="estado"
-                  value={formData.estado}
-                  onChange={handleChange}
+                  id="nearbyPlace"
+                  value={selectedNearby}
+                  onChange={(e) => setSelectedNearby(e.target.value)}
                   disabled={isSubmitting}
                 >
-                  <option value="AVAILABLE">Disponible</option>
-                  <option value="SOLD">Vendida</option>
-                  <option value="RENTED">Arrendada</option>
-                  <option value="INACTIVE">Inactiva</option>
+                  <option value="">Seleccionar lugar</option>
+                  {nearbyPlaces.map((place) => (
+                    <option key={place.id} value={place.id}>
+                      {place.name}
+                    </option>
+                  ))}
                 </select>
               </div>
 
               <div className="form-group">
-                <div className="checkbox-group">
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      name="publicada"
-                      checked={formData.publicada}
-                      onChange={handleChange}
-                      disabled={isSubmitting}
-                    />
-                    <span>Publicada</span>
-                  </label>
+                <label htmlFor="distance">Distancia (km)</label>
+                <input
+                  id="distance"
+                  type="number"
+                  step="0.1"
+                  value={distance}
+                  onChange={(e) => setDistance(e.target.value)}
+                  disabled={isSubmitting}
+                  placeholder="1.5"
+                />
+              </div>
 
-                  <label className="checkbox-label">
-                    <input
-                      type="checkbox"
-                      name="destacada"
-                      checked={formData.destacada}
-                      onChange={handleChange}
-                      disabled={isSubmitting}
-                    />
-                    <span>Destacada</span>
-                  </label>
-                </div>
+              <div className="form-group" style={{ display: 'flex', alignItems: 'flex-end' }}>
+                <button
+                  type="button"
+                  onClick={addNearbyPlace}
+                  disabled={isSubmitting}
+                  style={{
+                    padding: '10px 16px',
+                    backgroundColor: '#00A7FF',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    fontSize: '14px',
+                    fontWeight: '600',
+                  }}
+                >
+                  <Plus size={18} />
+                  Agregar
+                </button>
               </div>
             </div>
+
+            {errors.nearby && <span className="error-text">{errors.nearby}</span>}
+
+            {propertyNearby.length > 0 && (
+              <div style={{ marginTop: '16px' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ backgroundColor: '#f9fafb', borderBottom: '2px solid #e2e8f0' }}>
+                      <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600' }}>Lugar</th>
+                      <th style={{ padding: '12px', textAlign: 'left', fontSize: '14px', fontWeight: '600' }}>Distancia</th>
+                      <th style={{ padding: '12px', textAlign: 'center', fontSize: '14px', fontWeight: '600', width: '80px' }}>Acción</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {propertyNearby.map((item) => {
+                      const place = nearbyPlaces.find((p) => p.id === item.nearbyPlaceId);
+                      return (
+                        <tr key={item.nearbyPlaceId} style={{ borderBottom: '1px solid #e2e8f0' }}>
+                          <td style={{ padding: '12px', fontSize: '14px' }}>{place?.name}</td>
+                          <td style={{ padding: '12px', fontSize: '14px' }}>{item.distance} km</td>
+                          <td style={{ padding: '12px', textAlign: 'center' }}>
+                            <button
+                              type="button"
+                              onClick={() => removeNearbyPlace(item.nearbyPlaceId)}
+                              disabled={isSubmitting}
+                              style={{
+                                padding: '6px',
+                                backgroundColor: '#fee2e2',
+                                color: '#ef4444',
+                                border: 'none',
+                                borderRadius: '4px',
+                                cursor: 'pointer',
+                                display: 'inline-flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                              }}
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </section>
 
           {/* Imágenes */}

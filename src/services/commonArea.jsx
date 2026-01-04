@@ -2,7 +2,7 @@ import api from "./api";
 
 export const getCommonAreas = async () => {
   try {
-    const response = await api.get("/common-areas");
+    const response = await api.get("/api/common-areas");
     return response.data;
   } catch (error) {
     console.error("Error fetching common areas:", error);
@@ -11,7 +11,7 @@ export const getCommonAreas = async () => {
 };
 export const addCommonArea = async (area) => {
   try {
-    const response = await api.post("/common-areas", area);
+    const response = await api.post("/api/common-areas", area);
     return response.data;
   } catch (error) {
     console.error("Error adding common area:", error);
@@ -20,7 +20,7 @@ export const addCommonArea = async (area) => {
 };
 export const updateCommonArea = async (id, area) => {
   try {
-    const response = await api.put(`/common-areas/${id}`, area);
+    const response = await api.put(`/api/common-areas/${id}`, area);
     return response.data;
   } catch (error) {
     console.error("Error updating common area:", error);
@@ -29,7 +29,7 @@ export const updateCommonArea = async (id, area) => {
 };
 export const deleteCommonArea = async (id) => {
   try {
-    const response = await api.delete(`/common-areas/${id}`);
+    const response = await api.delete(`/api/common-areas/${id}`);
     return response.data;
   } catch (error) {
     console.error("Error deleting common area:", error);

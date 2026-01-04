@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { CircleX } from "lucide-react";
+import "../types/types.css";
 
 export default function FormCommonArea({ isOpen, onClose, areaToEdit, onSave }) {
   const [formData, setFormData] = useState({ id: null, name: "" });
