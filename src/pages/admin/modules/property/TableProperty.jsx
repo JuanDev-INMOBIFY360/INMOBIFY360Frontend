@@ -1,8 +1,11 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import PropertyCard from "./PropertyCard";
-import { getProperties } from "../../../../services/propertyService";
+import { getProperties, getProperty, createProperty, updateProperty } from "../../../../services/propertyService";
+import FormProperty from "./propertyForm.jsx";
+import "../../GlobalStyles/globalStyles.css";
 import "./propertyCards.css";
-import PropertyForm from "./propertyForm.jsx";
+
 export default function TableProperty() {
   const [properties, setProperties] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -10,7 +13,7 @@ export default function TableProperty() {
   const [searchTerm, setSearchTerm] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [propertyToEdit, setPropertyToEdit] = useState(null);
-  const [step, setStep] = useState(1);
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchProperties();
@@ -41,6 +44,48 @@ export default function TableProperty() {
     }
   };
 
+  const handleOpenModal = async (property = null) => {
+    if (property?.id) {
+      // Obtener datos completos de la propiedad
+      try {
+        setLoading(true);
+        const fullProperty = await getProperty(property.id);
+        setPropertyToEdit(fullProperty);
+        setModalOpen(true);
+      } catch (error) {
+        console.error("Error cargando propiedad:", error);
+        alert("Error al cargar los datos de la propiedad");
+      } finally {
+        setLoading(false);
+      }
+    } else {
+      setPropertyToEdit(null);
+      setModalOpen(true);
+    }
+  };
+
+  const handleCloseModal = () => {
+    setModalOpen(false);
+    setPropertyToEdit(null);
+  };
+
+  const handleSaveProperty = async (payload) => {
+    try {
+      if (propertyToEdit?.id) {
+        // Actualizar propiedad existente
+        await updateProperty(propertyToEdit.id, payload);
+      } else {
+        // Crear nueva propiedad
+        await createProperty(payload);
+      }
+      await fetchProperties();
+      handleCloseModal();
+    } catch (error) {
+      console.error("Error saving property:", error);
+      throw error; // Re-throw para que el formulario maneje el error
+    }
+  };
+
   if (loading) return <p>Cargando propiedades...</p>;
 
   return (
@@ -48,60 +93,49 @@ export default function TableProperty() {
       <header className="header-module">
         <h1 className="title-module">Gestión de Propiedades</h1>
       </header>
+
       <div className="controls">
         <div className="search-container">
           <input
             type="search"
-            placeholder="Buscar zonas comunes..."
+            placeholder="Buscar propiedades..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="search-input-module"
           />
         </div>
 
-        <button className="btn-add" onClick={() => setModalOpen(true)}>
-          + Agregar Zona
+        <button className="btn-add" onClick={() => handleOpenModal()}>
+          <span className="btn-add-icon">+</span>
+          Agregar Propiedad
         </button>
       </div>
-      <div className="property-grid">
-        {filteredProperties.map((property) => (
-          <PropertyCard key={property.id} property={property} />
-        ))}
-      </div>
-      <PropertyForm
+
+      {filteredProperties.length === 0 ? (
+        <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
+          {searchTerm
+            ? `No se encontraron propiedades que coincidan con "${searchTerm}"`
+            : "No hay propiedades registradas"}
+        </div>
+      ) : (
+        <div className="property-grid">
+          {filteredProperties.map((property) => (
+            <PropertyCard
+              key={property.id}
+              property={property}
+              onEdit={() => handleOpenModal(property)}
+              onView={() => navigate(`/properties/${property.id}`)}
+            />
+          ))}
+        </div>
+      )}
+
+      <FormProperty
         isOpen={modalOpen}
-        onClose={() => {
-          setModalOpen(false);
-          setPropertyToEdit(null);
-        }}
+        onClose={handleCloseModal}
         propertyToEdit={propertyToEdit}
-        onSave={async (payload) => {
-          await createProperty(payload); 
-          await fetchProperties();
-        }}
+        onSave={handleSaveProperty}
       />
-
-      <div className="form-actions">
-  {step > 1 && (
-    <button className="btn-cancel" onClick={() => setStep(step - 1)}>
-      Anterior
-    </button>
-  )}
-
-  {step < 5 ? (
-    <button className="btn-submit" onClick={() => setStep(step + 1)}>
-      Siguiente
-    </button>
-  ) : (
-    <button
-      className="btn-submit"
-      onClick={handleSubmit}
-      disabled={isSubmitting}
-    >
-      {isSubmitting ? "Guardando..." : "Guardar Propiedad"}
-    </button>
-  )}
-</div>
     </section>
   );
 }

@@ -1,6 +1,6 @@
 :root {
-  --navbar-height: 50px; /* Variable para la altura del navbar */
-  --transition: 0.26s ease;
+  --navbar-height: 70px;
+  --transition-navbar: 0.3s ease;
 }
 
 * {
@@ -9,72 +9,79 @@
   box-sizing: border-box;
 }
 
-/* Aplicar padding solo cuando el navbar está montado (evita gap en admin) */
 body.has-navbar {
-  background: var(--color-surface);
-  font-family: system-ui, -apple-system, sans-serif;
-  padding-top: var(--navbar-height); /* Compensa el espacio del navbar fixed */
+  background: var(--color-bg);
+  font-family: var(--font-family);
+  padding-top: var(--navbar-height);
 }
 
+/* ===== NAVBAR ===== */
 .navbar {
-  background: var(--color-bg);
+  background: linear-gradient(180deg, var(--color-white) 0%, var(--color-gold-50) 100%);
   height: var(--navbar-height);
   display: flex;
   align-items: center;
-  position: fixed; /* Cambiado de sticky a fixed */
+  position: fixed;
   top: 0;
-  left: 0; /* Asegura que empiece desde la izquierda */
-  right: 0; /* Asegura que termine en la derecha */
-  width: 100%; /* Ocupa todo el ancho */
+  left: 0;
+  right: 0;
+  width: 100%;
   z-index: 1000;
-  border-bottom: 1px solid rgba(234, 179, 8, 0.15);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
-  border-radius: 0 0 20px 20px;
+  border-bottom: 2px solid var(--color-gold-200);
+  box-shadow: 0 4px 20px rgba(184, 134, 11, 0.08);
 }
 
 .navbar-container {
   width: 100%;
+  max-width: 1600px;
+  margin: 0 auto;
   display: flex;
   align-items: center;
-  justify-content: space-between; 
-  padding: 0 10px;
+  justify-content: space-between;
+  padding: 0 24px;
+  gap: 20px;
 }
 
 .logo {
   display: flex;
   align-items: center;
+  flex-shrink: 0;
 }
 
 .logo a {
   display: flex;
   align-items: center;
   text-decoration: none;
-  overflow: hidden; 
-  width: 200px; 
-  height: 50px; 
+  overflow: hidden;
+  transition: all var(--transition-navbar);
+}
+
+.logo a:hover {
+  opacity: 0.8;
 }
 
 .image-logo {
   width: 200px;
   height: auto;
-  object-fit: cover;
-  object-position: center; 
+  object-fit: contain;
+  object-position: center;
+  max-height: 50px;
 }
 
 .center-menu {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%); 
+  transform: translateX(-50%);
   display: flex;
-  gap: 10px;
+  gap: 8px;
 }
 
-/* --- MENU --- */
+/* ===== MENU ===== */
 .nav-menu {
   display: flex;
   list-style: none;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 }
 
 .nav-item {
@@ -86,54 +93,76 @@ body.has-navbar {
   align-items: center;
   gap: 6px;
   padding: 10px 18px;
-  font-weight: 500;
-  font-size: 15px;
+  font-weight: 600;
+  font-size: 0.95rem;
   color: var(--color-text);
-  background: none;
+  background: transparent;
   border: none;
-  border-radius: 8px;
+  border-radius: var(--radius-md);
   cursor: pointer;
-  transition: var(--transition);
+  transition: all var(--transition-navbar);
   text-decoration: none;
+  position: relative;
+}
+
+.nav-link::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 50%;
+  width: 0;
+  height: 2px;
+  background: linear-gradient(90deg, var(--color-gold-500), var(--color-gold-600));
+  transition: all var(--transition-navbar);
+  transform: translateX(-50%);
 }
 
 .nav-link:hover {
-  background: rgba(234, 179, 8, 0.08);
-  color: var(--color-primary);
+  color: var(--color-gold-600);
+  background: var(--color-gold-50);
+}
+
+.nav-link:hover::after {
+  width: 100%;
 }
 
 /* Arrow rotation */
 .rotated {
   transform: rotate(180deg);
-  transition: var(--transition);
+  transition: all var(--transition-navbar);
 }
 
-/* --- DROPDOWN --- */
+/* ===== DROPDOWN ===== */
 .dropdown {
   position: absolute;
   left: 50%;
-  transform: translateX(-50%);
+  transform: translateX(-50%) translateY(10px);
   pointer-events: auto;
-  width: 240px;
-  background: var(--color-bg);
-  border-radius: 12px;
-  padding: 10px;
+  width: 260px;
+  background: var(--color-white);
+  border-radius: var(--radius-lg);
+  padding: 12px;
   display: flex;
   flex-direction: column;
   gap: 4px;
-  border: 1px solid rgba(234, 179, 8, 0.12);
-  box-shadow: 0 12px 38px rgba(0, 0, 0, 0.12);
+  border: 1px solid var(--color-gold-200);
+  box-shadow: 0 12px 40px rgba(184, 134, 11, 0.15);
   animation: dropdownFade 0.25s ease;
+  opacity: 1;
+  visibility: visible;
+  transition: all var(--transition-navbar);
 }
 
 @keyframes dropdownFade {
   from {
     opacity: 0;
-    transform: translateX(-50%) translateY(-10px);
+    transform: translateX(-50%) translateY(0px);
+    visibility: hidden;
   }
   to {
     opacity: 1;
-    transform: translateX(-50%) translateY(0);
+    transform: translateX(-50%) translateY(10px);
+    visibility: visible;
   }
 }
 
@@ -141,23 +170,93 @@ body.has-navbar {
   display: flex;
   align-items: center;
   gap: 12px;
-  padding: 12px 14px;
+  padding: 12px 16px;
   text-decoration: none;
-  border-radius: 8px;
-  font-size: 14px;
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 500;
   color: var(--color-text);
-  transition: var(--transition);
+  transition: all var(--transition-navbar);
+  position: relative;
+  overflow: hidden;
+}
+
+.dropdown-item::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 3px;
+  height: 100%;
+  background: var(--color-gold-500);
+  transform: translateX(-3px);
+  transition: all var(--transition-navbar);
 }
 
 .dropdown-item:hover {
-  background: rgba(234, 179, 8, 0.1);
-  transform: translateX(4px);
-  color: var(--color-primary);
+  background: var(--color-gold-50);
+  color: var(--color-gold-600);
+  padding-left: 20px;
 }
 
+.dropdown-item:hover::before {
+  transform: translateX(0);
+}
 
+/* ===== RESPONSIVE ===== */
 @media (max-width: 900px) {
   .nav-menu {
     display: none;
+  }
+
+  .navbar-container {
+    padding: 0 16px;
+  }
+
+  .image-logo {
+    width: 160px;
+  }
+}
+
+@media (max-width: 768px) {
+  :root {
+    --navbar-height: 60px;
+  }
+
+  .navbar {
+    border-radius: 0;
+  }
+
+  .navbar-container {
+    padding: 0 12px;
+  }
+
+  .image-logo {
+    width: 140px;
+    max-height: 40px;
+  }
+
+  .nav-link {
+    padding: 8px 12px;
+    font-size: 0.85rem;
+  }
+}
+
+@media (max-width: 480px) {
+  :root {
+    --navbar-height: 55px;
+  }
+
+  .navbar {
+    height: var(--navbar-height);
+  }
+
+  .navbar-container {
+    padding: 0 10px;
+  }
+
+  .image-logo {
+    width: 120px;
+    max-height: 35px;
   }
 }

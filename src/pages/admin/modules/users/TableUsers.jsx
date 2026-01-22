@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import {
   getUsers,
-  getUser,
   createUser,
   updateUser,
   deleteUser,
@@ -13,7 +12,7 @@ import FormUser from "./FormUser";
 
 export default function TableUsers() {
   const [users, setUsers] = useState([]);
-  const [filtered, setFiltered] = useState([]);
+  const [filteredUsers, setfilteredUsers] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -24,12 +23,13 @@ export default function TableUsers() {
   }, []);
 
   useEffect(() => {
+ 
     const f = users.filter(
       (u) =>
-        u.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        (u.email || "").toLowerCase().includes(searchTerm.toLowerCase())
+        (u.name || "").toLowerCase().includes(searchTerm) ||
+        (u.email || "").toLowerCase().includes(searchTerm)
     );
-    setFiltered(f);
+    setfilteredUsers(f);
   }, [searchTerm, users]);
 
   const fetchUsers = async () => {
@@ -37,9 +37,11 @@ export default function TableUsers() {
     try {
       const data = await getUsers();
       setUsers(data);
-      setFiltered(data);
+      setfilteredUsers(data);
     } catch (error) {
       console.error("Error fetching Users", error);
+      setUsers([]);
+      setfilteredUsers([]);
       alert("Error cargando Usuarios");
     } finally {
       setLoading(false);
@@ -120,7 +122,7 @@ export default function TableUsers() {
               </tr>
             </thead>
             <tbody>
-              {filtered.length === 0 ? (
+              {filteredUsers.length === 0 ? (
                 <tr>
                   <td colSpan="5" className="no-data-module">
                     {searchTerm
@@ -129,7 +131,7 @@ export default function TableUsers() {
                   </td>
                 </tr>
               ) : (
-                filtered.map((user) => (
+                filteredUsers.map((user) => (
                   <tr key={user.id}>
                     <td>{user.name}</td>
                     <td>{user.email || "—"}</td>

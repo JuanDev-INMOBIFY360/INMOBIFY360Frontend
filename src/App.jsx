@@ -21,8 +21,7 @@ import PropertyDetail from "./pages/client/properties/detailsProperties/Property
 import SearchResults from "./pages/client/landing/SearchResults";
 
 function PropertyDetailWrapper() {
-  const { id } = useParams();
-  return <PropertyDetail propertyId={id} />;
+  return <PropertyDetail />;
 }
 
 function App() {

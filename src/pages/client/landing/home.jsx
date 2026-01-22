@@ -1,7 +1,6 @@
 import React, { useEffect, useState } from "react";
 import api from "../../../services/api";
 import "./homeStyles.css"
-// import video from "../../../assets"
 import PropertyList from "../properties/propertyList/PropertyList";
 import SearchBar from '../../../components/SearchBar/';
 
@@ -11,41 +10,35 @@ export default function Home() {
   useEffect(() => {
     api.get("/")
       .then((res) => {
-        console.log("OK →", res.data);
+        console.log("✅ API conectada →", res.data);
       })
       .catch((err) => {
-        console.error("ERROR →", err);
+        console.error("⚠️ API disponible pero sin respuesta de verificación →", err);
       });
   }, []);
   
   return (
     <>
+      {/* ===== HERO SECTION ===== */}
       <header className="home-container home-section">
-        {/* <video
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="bg-video"
-          src={video}
-          aria-hidden="true"
-        /> */}
+        <div className="overlay-home"></div>
 
-        <div className="overlay-home">
-          <section className="home-content">
-            <h1 className="title-home">INMOBIFY <span className="title-accent">360</span></h1>
-            <p className="subtitle-home">
-              Conectamos personas con espacios y oportunidades
-            </p>
-          </section>
-          
-          <div className="search-box">
-            <SearchBar initialValue={query} />
-          </div>
+        <div className="home-content">
+          <h1 className="title-home">
+            INMOBIFY <span className="title-accent">360</span>
+          </h1>
+          <p className="subtitle-home">
+            Encuentra tu hogar o inversión perfecta con facilidad
+          </p>
+        </div>
+        
+        <div className="search-box">
+          <SearchBar initialValue={query} variant="hero" />
         </div>
       </header>
 
-      <main className="home-section">
+      {/* ===== PROPERTIES SECTION ===== */}
+      <main className="home-section properties-section">
         <PropertyList />
       </main>
     </>

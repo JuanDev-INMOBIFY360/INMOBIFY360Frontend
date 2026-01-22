@@ -1,43 +1,147 @@
-.inm-search{
-  display:flex;
-  align-items:center;
-  width:100%;
-  max-width:520px;
-  background:var(--color-bg);
-  padding:10px 16px;
-  border-radius:50px;
-  box-shadow:0 6px 18px rgba(0,0,0,0.08);
+/* ===== SEARCH BAR ===== */
+.search-bar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  width: 100%;
+  background: var(--color-white);
+  border-radius: var(--radius-full);
+  overflow: hidden;
+  transition: all var(--transition-normal);
+  font-family: var(--font-family);
 }
 
-.inm-search-input{
-  flex:1;
-  border:none;
-  outline:none;
-  font-size:1.05rem;
-  color:var(--color-text);
-  background:transparent;
+/* ===== VARIANT: HERO ===== */
+.search-bar--hero {
+  max-width: 600px;
+  padding: 4px 8px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+  border: 2px solid transparent;
 }
 
-.inm-search-input::placeholder{
-  color:rgba(43,43,43,0.5);
+.search-bar--hero:focus-within {
+  border-color: var(--color-gold-300);
+  box-shadow: 0 15px 40px rgba(184, 134, 11, 0.2);
 }
 
-.inm-search-btn{
-  background:var(--color-primary); /* project accent color - now using theme primary */
-  border:none;
-  padding:10px 12px;
-  border-radius:26px;
-  display:flex;
-  align-items:center;
-  justify-content:center;
-  cursor:pointer;
+.search-bar--hero .search-bar__input-group {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex: 1;
+  padding: 0 16px;
 }
 
-.inm-search-btn:hover{
-  filter:brightness(0.95);
+.search-bar--hero .search-bar__icon {
+  color: var(--color-gold-500);
+  flex-shrink: 0;
 }
 
-@media (max-width:768px){
-  .inm-search{padding:12px 14px}
-  .inm-search-input{font-size:1rem}
+.search-bar--hero .search-bar__input {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 1.05rem;
+  color: var(--color-text);
+  background: transparent;
+  padding: 14px 0;
+}
+
+.search-bar--hero .search-bar__input::placeholder {
+  color: var(--color-text-tertiary);
+}
+
+.search-bar--hero .search-bar__button {
+  background: linear-gradient(135deg, var(--color-gold-500) 0%, var(--color-gold-600) 100%);
+  color: var(--color-white);
+  border: none;
+  padding: 14px 32px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+  font-size: 0.95rem;
+  cursor: pointer;
+  transition: all var(--transition-normal);
+  box-shadow: 0 4px 15px rgba(184, 134, 11, 0.3);
+  white-space: nowrap;
+}
+
+.search-bar--hero .search-bar__button:hover {
+  background: linear-gradient(135deg, var(--color-gold-600) 0%, var(--color-gold-700) 100%);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(184, 134, 11, 0.4);
+}
+
+.search-bar--hero .search-bar__button:active {
+  transform: translateY(0);
+}
+
+/* ===== VARIANT: COMPACT ===== */
+.search-bar--compact {
+  max-width: 400px;
+  padding: 8px 12px;
+  border: 2px solid var(--color-border);
+  background: var(--color-bg-secondary);
+}
+
+.search-bar--compact:focus-within {
+  border-color: var(--color-gold-300);
+  background: var(--color-white);
+}
+
+.search-bar--compact .search-bar__input--compact {
+  flex: 1;
+  border: none;
+  outline: none;
+  font-size: 0.95rem;
+  color: var(--color-text);
+  background: transparent;
+  padding: 8px 12px;
+}
+
+.search-bar--compact .search-bar__input--compact::placeholder {
+  color: var(--color-text-secondary);
+}
+
+.search-bar--compact .search-bar__button--compact {
+  background: var(--color-gold-500);
+  border: none;
+  padding: 8px;
+  border-radius: 6px;
+  color: var(--color-white);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all var(--transition-fast);
+}
+
+.search-bar--compact .search-bar__button--compact:hover {
+  background: var(--color-gold-600);
+  transform: scale(1.05);
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .search-bar--hero {
+    max-width: 100%;
+    padding: 2px 4px;
+  }
+
+  .search-bar--hero .search-bar__input-group {
+    padding: 0 12px;
+  }
+
+  .search-bar--hero .search-bar__input {
+    font-size: 0.95rem;
+    padding: 12px 0;
+  }
+
+  .search-bar--hero .search-bar__button {
+    padding: 12px 20px;
+    font-size: 0.85rem;
+  }
+
+  .search-bar--compact {
+    max-width: 100%;
+  }
 }

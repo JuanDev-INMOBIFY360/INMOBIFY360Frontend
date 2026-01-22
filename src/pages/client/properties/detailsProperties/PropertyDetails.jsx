@@ -1,17 +1,22 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { 
-  MapPin, Bed, Bath, Car, Maximize, Building, 
-  Share2, Heart, Phone, Mail, User, CheckCircle
+  MapPin, Bed, Bath, Car, Maximize2, Building, 
+  Share2, Heart, Phone, Mail, User, CheckCircle, ChevronLeft, ChevronRight
 } from 'lucide-react';
+import { getProperty } from '../../../../services/propertyService';
 import { searchByCategory, searchByType } from '../../../../utils/searchHelpers';
 import './PropertyDetail.css';
 
-const PropertyDetail = ({ propertyId }) => {
+const PropertyDetail = () => {
+  const { propertyId } = useParams();
   const [property, setProperty] = useState(null);
   const [loading, setLoading] = useState(true);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
   const navigate = useNavigate();
+
+  const PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%221200%22 height=%22800%22%3E%3Crect fill=%22%23e2e8f0%22 width=%221200%22 height=%22800%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2248%22 font-weight=%22600%22 fill=%22%23718096%22 text-anchor=%22middle%22 dy=%22.3em%22%3ESin imagen disponible%3C/text%3E%3C/svg%3E';
+
   const [formData, setFormData] = useState({
     nombre: '',
     identificacion: '',
@@ -23,49 +28,41 @@ const PropertyDetail = ({ propertyId }) => {
   });
 
   useEffect(() => {
-    // Simular carga de API - Reemplazar con getPropertyById(propertyId)
-    const mockProperty = {
-      id: 1,
-      titulo: "Apartamento en bogotá, d.c. en bogotá, d.c., san andrés",
-      descripcion: "Se vende propiedad ubicada en el Conjunto Residencial Torres de Sevilla, en Bogotá D.C. El apartamento está distribuido en 2 habitaciones, 2 baños, sala, comedor, cocina integral, estudio, zoqan de ropa y salón de eventos. Cuenta con buen acceso, elevador y seguridad privada, en buen estado de conservación y con gastos de administración de $150.000. Ubicado en el barrio San Andrés, Kennedy, con cercanía a escuelas. Una excelente oportunidad de inversión en una zona residencial tranquila y segura.",
-      precio: 300000000,
-      area: 40.3,
-      areaPrivada: 40.3,
-      habitaciones: 2,
-      banos: 2,
-      parqueaderos: 0,
-      antiguedad: 15,
-      administracion: 150000,
-      direccion: "Carrera 68D # 40 0",
-      ciudad: "Bogotá, D.C.",
-      barrio: "San Andrés",
-      tipo: "Apartamento",
-      amenidades: [
-        "Zona de lavandería",
-        "Zonas comunes en general",
-        "Parque infantil",
-        "Salón social"
-      ],
-      imagenes: [
-        "https://images.unsplash.com/photo-1522708323590-d24dbb6b0267?w=1200&h=800&fit=crop",
-        "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=1200&h=800&fit=crop",
-        "https://images.unsplash.com/photo-1600596542815-ffad4c1539a9?w=1200&h=800&fit=crop",
-        "https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=1200&h=800&fit=crop"
-      ]
+    if (!propertyId) {
+      setLoading(false);
+      return;
+    }
+
+    const loadProperty = async () => {
+      try {
+        const data = await getProperty(propertyId);
+        console.log("✅ Propiedad cargada:", data);
+        setProperty(data);
+      } catch (err) {
+        console.error("❌ Error cargando propiedad:", err);
+        setProperty(null);
+      } finally {
+        setLoading(false);
+      }
     };
 
-    setTimeout(() => {
-      setProperty(mockProperty);
-      setLoading(false);
-    }, 500);
+    loadProperty();
   }, [propertyId]);
+
+  const getImages = () => {
+    if (!property) return [PLACEHOLDER_IMAGE];
+    return property.images?.length > 0 
+      ? property.images.map(img => img.url)
+      : [PLACEHOLDER_IMAGE];
+  };
 
   const formatPrice = (price) => {
     return new Intl.NumberFormat('es-CO', {
       style: 'currency',
       currency: 'COP',
-      minimumFractionDigits: 0
-    }).format(price);
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(price || 0);
   };
 
   const handleInputChange = (e) => {
@@ -82,23 +79,47 @@ const PropertyDetail = ({ propertyId }) => {
     // Aquí enviarías los datos a tu API
   };
 
+  const handlePrevImage = () => {
+    const images = getImages();
+    setCurrentImageIndex(prev => prev === 0 ? images.length - 1 : prev - 1);
+  };
+
+  const handleNextImage = () => {
+    const images = getImages();
+    setCurrentImageIndex(prev => prev === images.length - 1 ? 0 : prev + 1);
+  };
+
   if (loading) {
     return <div className="detail-loading">Cargando propiedad...</div>;
   }
 
   if (!property) {
-    return <div className="detail-loading">Propiedad no encontrada</div>;
+    return (
+      <div className="detail-loading">
+        <p>Propiedad no encontrada</p>
+        <button onClick={() => navigate('/')} style={{marginTop: '20px', padding: '10px 20px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: '6px', cursor: 'pointer'}}>
+          Volver al inicio
+        </button>
+      </div>
+    );
   }
+
+  const images = getImages();
+  const operationType = property.operacion === 'SALE' ? 'Venta' : 'Renta';
 
   return (
     <main className="property-detail">
       {/* Breadcrumb Navigation */}
       <nav className="breadcrumb" aria-label="Navegación de migas de pan">
-        <a href="/">Tu360Inmobiliario</a>
+        <a href="/">INMOBIFY 360</a>
         <span>→</span>
-        <button className="breadcrumb-link" onClick={() => navigate(searchByCategory('Venta'))} style={{background:'transparent',border:'none',cursor:'pointer',color:'#0066cc',padding:0}} aria-label="Ir a propiedades en venta">Venta</button>
+        <button className="breadcrumb-link" onClick={() => navigate(`/?operacion=${property.operacion}`)} style={{background:'transparent',border:'none',cursor:'pointer',color:'#0066cc',padding:0}} aria-label={`Ir a propiedades en ${operationType}`}>
+          {operationType}
+        </button>
         <span>→</span>
-        <button className="breadcrumb-link" onClick={() => navigate(searchByType(property?.tipo || property?.typeProperty?.name))} style={{background:'transparent',border:'none',cursor:'pointer',color:'#0066cc',padding:0}} aria-label={`Ir a ${property?.tipo || 'propiedades'}`}>{property?.tipo || property?.typeProperty?.name || 'Propiedad'}</button>
+        <button className="breadcrumb-link" onClick={() => navigate(searchByType(property?.typeProperty?.name))} style={{background:'transparent',border:'none',cursor:'pointer',color:'#0066cc',padding:0}} aria-label={`Ir a ${property?.typeProperty?.name || 'propiedades'}`}>
+          {property?.typeProperty?.name || 'Propiedad'}
+        </button>
         <span>→</span>
         <span>{property?.titulo}</span>
       </nav>
@@ -110,34 +131,54 @@ const PropertyDetail = ({ propertyId }) => {
           <section className="gallery" aria-label="Galería de imágenes">
             <div className="gallery-main">
               <img 
-                src={property.imagenes[currentImageIndex]} 
+                src={images[currentImageIndex]} 
                 alt={property.titulo}
                 className="gallery-main-image"
+                onError={(e) => {
+                  e.target.src = PLACEHOLDER_IMAGE;
+                }}
               />
-              <div className="gallery-badge">
-                Más de {property.antiguedad} años de antigüedad
+              <div className="gallery-nav-buttons">
+                <button 
+                  className="gallery-nav-btn"
+                  onClick={handlePrevImage}
+                  aria-label="Imagen anterior"
+                >
+                  <ChevronLeft size={24} />
+                </button>
+                <button 
+                  className="gallery-nav-btn"
+                  onClick={handleNextImage}
+                  aria-label="Siguiente imagen"
+                >
+                  <ChevronRight size={24} />
+                </button>
               </div>
-              <div className="gallery-controls">
-                <button className="gallery-control-btn" aria-label="Ver fotos">Foto</button>
-                <button className="gallery-control-btn" aria-label="Ver mapa">Mapa</button>
+              <div className="gallery-counter">
+                {currentImageIndex + 1} de {images.length}
               </div>
             </div>
             
-            <div className="gallery-thumbnails" role="region" aria-label="Miniaturas de imágenes">
-              {property.imagenes.map((img, idx) => (
-                <img
-                  key={idx}
-                  src={img}
-                  alt={`Foto ${idx + 1}`}
-                  className={`gallery-thumbnail ${currentImageIndex === idx ? 'active' : ''}`}
-                  onClick={() => setCurrentImageIndex(idx)}
-                  role="button"
-                  tabIndex="0"
-                  aria-pressed={currentImageIndex === idx}
-                  onKeyPress={(e) => e.key === 'Enter' && setCurrentImageIndex(idx)}
-                />
-              ))}
-            </div>
+            {images.length > 1 && (
+              <div className="gallery-thumbnails" role="region" aria-label="Miniaturas de imágenes">
+                {images.map((img, idx) => (
+                  <img
+                    key={idx}
+                    src={img}
+                    alt={`Foto ${idx + 1}`}
+                    className={`gallery-thumbnail ${currentImageIndex === idx ? 'active' : ''}`}
+                    onClick={() => setCurrentImageIndex(idx)}
+                    role="button"
+                    tabIndex="0"
+                    aria-pressed={currentImageIndex === idx}
+                    onKeyPress={(e) => e.key === 'Enter' && setCurrentImageIndex(idx)}
+                    onError={(e) => {
+                      e.target.src = PLACEHOLDER_IMAGE;
+                    }}
+                  />
+                ))}
+              </div>
+            )}
           </section>
 
           {/* Precio y Ubicación */}
@@ -145,21 +186,43 @@ const PropertyDetail = ({ propertyId }) => {
             <h1 className="property-title">{formatPrice(property.precio)}</h1>
             <h2 className="property-subtitle">{property.titulo}</h2>
             <div className="property-meta" role="doc-subtitle">
-              <span className="property-meta-item">
-                <Bed size={16} aria-hidden="true" /> {property.habitaciones} hab
-              </span>
-              <span className="property-meta-separator" aria-hidden="true">|</span>
-              <span className="property-meta-item">
-                <Bath size={16} aria-hidden="true" /> {property.banos} baños
-              </span>
-              <span className="property-meta-separator" aria-hidden="true">|</span>
-              <span className="property-meta-item">
-                <Maximize size={16} aria-hidden="true" /> {property.area} m²
-              </span>
+              {property.areaConstruida > 0 && (
+                <>
+                  <span className="property-meta-item">
+                    <Maximize2 size={16} aria-hidden="true" /> {property.areaConstruida} m²
+                  </span>
+                  <span className="property-meta-separator" aria-hidden="true">|</span>
+                </>
+              )}
+              {property.habitaciones > 0 && (
+                <>
+                  <span className="property-meta-item">
+                    <Bed size={16} aria-hidden="true" /> {property.habitaciones} hab
+                  </span>
+                  <span className="property-meta-separator" aria-hidden="true">|</span>
+                </>
+              )}
+              {property.banos > 0 && (
+                <>
+                  <span className="property-meta-item">
+                    <Bath size={16} aria-hidden="true" /> {property.banos} baños
+                  </span>
+                  <span className="property-meta-separator" aria-hidden="true">|</span>
+                </>
+              )}
+              {property.parqueaderos > 0 && (
+                <span className="property-meta-item">
+                  <Car size={16} aria-hidden="true" /> {property.parqueaderos} parq.
+                </span>
+              )}
             </div>
             <div className="property-location">
               <MapPin size={18} aria-hidden="true" />
-              <span>{property.direccion}</span>
+              <div>
+                <span>{property.direccion}</span>
+                {property.barrio && <span className="barrio">{property.barrio}</span>}
+                <span className="ciudad">{property.ciudad}</span>
+              </div>
             </div>
           </header>
 
@@ -170,56 +233,82 @@ const PropertyDetail = ({ propertyId }) => {
               Características
             </h3>
 
-            <section className="characteristics-section">
-              <h4>Descripción</h4>
-              <p className="description-text">{property.descripcion}</p>
-            </section>
+            {property.descripcion && (
+              <section className="characteristics-section">
+                <h4>Descripción</h4>
+                <p className="description-text">{property.descripcion}</p>
+              </section>
+            )}
 
             <section className="characteristics-section">
-              <h4>Interior</h4>
+              <h4>Detalles</h4>
               <div className="characteristics-grid">
-                <article className="characteristic-item">
-                  <Maximize className="characteristic-icon" aria-hidden="true" />
-                  <div>
-                    <span className="characteristic-label">Área</span>
-                    <span className="characteristic-value">{property.area} m²</span>
-                  </div>
-                </article>
-                <article className="characteristic-item">
-                  <Maximize className="characteristic-icon" aria-hidden="true" />
-                  <div>
-                    <span className="characteristic-label">Área construida</span>
-                    <span className="characteristic-value">{property.areaPrivada} m²</span>
-                  </div>
-                </article>
-                <article className="characteristic-item">
-                  <Bed className="characteristic-icon" aria-hidden="true" />
-                  <div>
-                    <span className="characteristic-label">Habitaciones</span>
-                    <span className="characteristic-value">{property.habitaciones}</span>
-                  </div>
-                </article>
-                <article className="characteristic-item">
-                  <Bath className="characteristic-icon" aria-hidden="true" />
-                  <div>
-                    <span className="characteristic-label">Baños</span>
-                    <span className="characteristic-value">{property.banos}</span>
-                  </div>
-                </article>
+                {property.areaConstruida > 0 && (
+                  <article className="characteristic-item">
+                    <Maximize2 className="characteristic-icon" aria-hidden="true" />
+                    <div>
+                      <span className="characteristic-label">Área construida</span>
+                      <span className="characteristic-value">{property.areaConstruida} m²</span>
+                    </div>
+                  </article>
+                )}
+                {property.habitaciones > 0 && (
+                  <article className="characteristic-item">
+                    <Bed className="characteristic-icon" aria-hidden="true" />
+                    <div>
+                      <span className="characteristic-label">Habitaciones</span>
+                      <span className="characteristic-value">{property.habitaciones}</span>
+                    </div>
+                  </article>
+                )}
+                {property.banos > 0 && (
+                  <article className="characteristic-item">
+                    <Bath className="characteristic-icon" aria-hidden="true" />
+                    <div>
+                      <span className="characteristic-label">Baños</span>
+                      <span className="characteristic-value">{property.banos}</span>
+                    </div>
+                  </article>
+                )}
+                {property.parqueaderos > 0 && (
+                  <article className="characteristic-item">
+                    <Car className="characteristic-icon" aria-hidden="true" />
+                    <div>
+                      <span className="characteristic-label">Parqueaderos</span>
+                      <span className="characteristic-value">{property.parqueaderos}</span>
+                    </div>
+                  </article>
+                )}
               </div>
             </section>
 
-            <section className="characteristics-section">
-              <h4>Zonas comunes</h4>
-              <ul className="amenities-list">
-                {property.amenidades.map((amenidad, idx) => (
-                  <li key={idx} className="amenity-item">
-                    <CheckCircle size={16} className="amenity-icon" aria-hidden="true" />
-                    {amenidad}
-                  </li>
-                ))}
-              </ul>
-            </section>
+            {property.commonAreas && property.commonAreas.length > 0 && (
+              <section className="characteristics-section">
+                <h4>Zonas comunes</h4>
+                <ul className="amenities-list">
+                  {property.commonAreas.map((area, idx) => (
+                    <li key={idx} className="amenity-item">
+                      <CheckCircle size={16} className="amenity-icon" aria-hidden="true" />
+                      {area.commonArea?.name || area.name}
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
+
+            {property.properties && property.properties.length > 0 && (
+              <section className="characteristics-section">
+                <h4>Lugares cercanos</h4>
+                <ul className="amenities-list">
+                  {property.properties.map((nearby, idx) => (
+                    <li key={idx} className="amenity-item">
+                      <CheckCircle size={16} className="amenity-icon" aria-hidden="true" />
+                      {nearby.nearbyPlace?.name || nearby.name} ({nearby.distance ? `${nearby.distance} m` : 'Distancia no especificada'})
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            )}
           </section>
         </section>
 

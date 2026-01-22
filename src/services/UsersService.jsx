@@ -3,7 +3,7 @@ import api from './api';
 export const getUsers = async () => {
   try {
     const res = await api.get('/api/users');
-    return res.data;
+    return res.data.data;
   } catch (err) {
     console.error('❌ Error fetching users:', err);
     throw err;

@@ -1,11 +1,11 @@
 import api from './api';
 
 /**
- * Obtener todas las propiedades
+ * Obtener todas las propiedades (público - sin autenticación)
  */
 export const getProperties = async (params = {}) => {
   try {
-    const res = await api.get('/api/properties', { params });
+    const res = await api.get('/api/properties/public/list', { params });
     return res.data.data || res.data;
   } catch (err) {
     console.error('❌ Error fetching properties:', err);
@@ -14,11 +14,16 @@ export const getProperties = async (params = {}) => {
 };
 
 /**
- * Obtener una propiedad por ID
+ * Obtener una propiedad por ID (público - sin autenticación)
  */
 export const getProperty = async (id) => {
-  const res = await api.get(`/api/properties/${id}`);
-  return res.data;
+  try {
+    const res = await api.get(`/api/properties/public/${id}`);
+    return res.data.data || res.data;
+  } catch (err) {
+    console.error('❌ Error fetching property:', err);
+    throw err;
+  }
 };
 
 /**

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, MapPin, Bed, Bath, Car, Maximize } from 'lucide-react';
+import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
 import { getProperties } from '../../../../services/propertyService';
 import { searchByType, searchByCity } from '../../../../utils/searchHelpers';
 import './PropertyCarousel.css';
@@ -13,24 +13,34 @@ const PropertyCarousel = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
+  const PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23e2e8f0%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2218%22 font-weight=%22600%22 fill=%22%23718096%22 text-anchor=%22middle%22 dy=%22.3em%22%3ESin imagen%3C/text%3E%3C/svg%3E';
+
   useEffect(() => {
     getProperties()
       .then((data) => {
         console.log("✅ Propiedades recibidas:", data);
         
-        const transformedProperties = data.map(prop => ({
+        // Filtrar solo propiedades publicadas
+        const publishedProperties = Array.isArray(data) 
+          ? data.filter(prop => prop.publicada !== false)
+          : [];
+
+        const transformedProperties = publishedProperties.map(prop => ({
           id: prop.id,
-          precio: prop.precio,
-          area: prop.area,
+          titulo: prop.titulo || 'Propiedad',
+          precio: prop.precio || 0,
+          areaConstruida: prop.areaConstruida || 0,
           habitaciones: prop.habitaciones || 0,
           banos: prop.banos || 0,
           parqueaderos: prop.parqueaderos || 0,
           direccion: prop.direccion || 'Dirección no disponible',
-          ciudad: `${prop.city?.name || ''}, ${prop.department?.name || ''}`.trim() || 'Ciudad no disponible',
-          cityId: prop.city?.id ?? prop.cityId ?? null,
-          departmentId: prop.department?.id ?? prop.departmentId ?? null,
-          tipo: prop.typeProperty?.name || 'Propiedad',
-          imagen: prop.imagenes?.[0]?.url || "https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop"
+          ciudad: prop.ciudad || 'Ciudad no disponible',
+          barrio: prop.barrio || '',
+          operacion: prop.operacion || 'SALE',
+          typeProperty: prop.typeProperty?.name || 'Propiedad',
+          imagen: prop.images?.find(img => img.isPrimary)?.url || 
+                  prop.images?.[0]?.url || 
+                  PLACEHOLDER_IMAGE
         }));
         
         setProperties(transformedProperties);
@@ -53,11 +63,15 @@ const PropertyCarousel = () => {
   }, []);
 
   const maxIndex = Math.max(0, properties.length - itemsPerView);
-  const formatPrice = (price) => new Intl.NumberFormat('es-CO', {
-    style: 'currency',
-    currency: 'COP',
-    minimumFractionDigits: 0
-  }).format(price);
+  
+  const formatPrice = (price) => {
+    return new Intl.NumberFormat('es-CO', {
+      style: 'currency',
+      currency: 'COP',
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0
+    }).format(price);
+  };
 
   if (loading) {
     return (
@@ -130,65 +144,76 @@ const PropertyCarousel = () => {
                   <div className="property-card-inner">
                     {/* Imagen */}
                     <div className="property-image-wrapper">
-                      <img src={prop.imagen} alt={prop.direccion} className="property-image" loading="lazy" />
-                          <button className="property-badge" onClick={() => navigate(searchByType(prop.tipo))} style={{background:'transparent',border:'none',cursor:'pointer',fontWeight:'bold'}} aria-label={`Filtrar por ${prop.tipo}`}>
-                        {prop.tipo}
-                      </button>
+                      <img 
+                        src={prop.imagen} 
+                        alt={prop.titulo} 
+                        className="property-image" 
+                        loading="lazy"
+                        onError={(e) => {
+                          e.target.src = PLACEHOLDER_IMAGE;
+                        }}
+                      />
                       <div className="property-image-overlay" aria-hidden="true"></div>
                     </div>
                     
                     {/* Contenido */}
                     <div className="property-card-content">
+                      {/* Agencia y tipo */}
+                      <button 
+                        className="property-badge" 
+                        onClick={(e) => {
+                          e.preventDefault();
+                          navigate(searchByType(prop.typeProperty));
+                        }}
+                        aria-label={`Filtrar por ${prop.typeProperty}`}
+                      >
+                        {prop.typeProperty.toUpperCase()} | DISPONIBLE
+                      </button>
+
+                      {/* Título */}
+                      <h3 className="property-title" title={prop.titulo}>
+                        {prop.titulo.length > 50 ? prop.titulo.substring(0, 50) + '...' : prop.titulo}
+                      </h3>
+
                       {/* Ubicación */}
                       <address className="property-location">
-                        <MapPin className="property-location-icon" aria-hidden="true" />
+                        <MapPin className="property-location-icon" aria-hidden="true" size={16} />
                         <div>
                           <p className="property-address">{prop.direccion}</p>
-                          <button
-                            className="property-city"
-                            onClick={() => {
-                              // Navegar usando el id de la ciudad si está disponible, si no, enviar el nombre
-                              const value = prop.cityId ? prop.cityId : prop.ciudad.split(',')[0];
-                              navigate(searchByCity(value));
-                            }}
-                            style={{background:'transparent',border:'none',cursor:'pointer',color:'#6b7280',padding:0,textAlign:'left'}}
-                            aria-label={`Filtrar por ${prop.ciudad.split(',')[0]}`}
-                          >
-                            {prop.ciudad}
-                          </button>
+                          <p className="property-city">
+                            {prop.barrio ? `${prop.barrio}, ` : ''}{prop.ciudad}
+                          </p>
                         </div>
                       </address>
                       
                       {/* Características */}
-                      <ul className="property-features" aria-label="Características del inmueble">
-                        <li className="property-feature">
-                          <Maximize className="property-feature-icon" aria-hidden="true" />
-                          <span>{prop.area}m²</span>
-                        </li>
-                        <li className="property-feature">
-                          <Bed className="property-feature-icon" aria-hidden="true" />
-                          <span>{prop.habitaciones}</span>
-                        </li>
-                        <li className="property-feature">
-                          <Bath className="property-feature-icon" aria-hidden="true" />
-                          <span>{prop.banos}</span>
-                        </li>
-                        <li className="property-feature">
-                          <Car className="property-feature-icon" aria-hidden="true" />
-                          <span>{prop.parqueaderos}</span>
-                        </li>
+                      <ul className="property-features-inline" aria-label="Características del inmueble">
+                        {prop.areaConstruida > 0 && (
+                          <li>{prop.areaConstruida}m²</li>
+                        )}
+                        {prop.habitaciones > 0 && (
+                          <li>{prop.habitaciones} bed</li>
+                        )}
+                        {prop.banos > 0 && (
+                          <li>{prop.banos} bath</li>
+                        )}
+                        {prop.parqueaderos > 0 && (
+                          <li>{prop.parqueaderos} car</li>
+                        )}
                       </ul>
                       
                       {/* Footer */}
                       <footer className="property-footer">
                         <div>
-                          <span className="property-price-label">Precio</span>
+                          <span className="property-price-label">
+                            {prop.operacion === 'SALE' ? 'Venta' : 'Renta'}
+                          </span>
                           <p className="property-price">{formatPrice(prop.precio)}</p>
                         </div>
                         <button
                           className="property-btn"
                           onClick={() => navigate(`/properties/${prop.id}`)}
-                          aria-label={`Ver detalles de ${prop.direccion}`}
+                          aria-label={`Ver detalles de ${prop.titulo}`}
                         >
                           Ver más
                         </button>
