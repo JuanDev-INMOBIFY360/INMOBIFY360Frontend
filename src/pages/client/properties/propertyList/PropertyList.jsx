@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
-import { ChevronLeft, ChevronRight, MapPin } from 'lucide-react';
+import { ChevronLeft, ChevronRight, Home, Maximize2, Bed, Bath, Car } from 'lucide-react';
 import { getProperties } from '../../../../services/propertyService';
-import { searchByType, searchByCity } from '../../../../utils/searchHelpers';
+import { searchByType } from '../../../../utils/searchHelpers';
 import './PropertyCarousel.css';
 import { useNavigate } from 'react-router-dom';
 
@@ -154,11 +154,8 @@ const PropertyCarousel = () => {
                         }}
                       />
                       <div className="property-image-overlay" aria-hidden="true"></div>
-                    </div>
-                    
-                    {/* Contenido */}
-                    <div className="property-card-content">
-                      {/* Agencia y tipo */}
+
+                      {/* Badge tipo (TOP RIGHT) */}
                       <button 
                         className="property-badge" 
                         onClick={(e) => {
@@ -169,46 +166,49 @@ const PropertyCarousel = () => {
                       >
                         {prop.typeProperty.toUpperCase()} | DISPONIBLE
                       </button>
-
-                      {/* Título */}
+                    </div>
+                    
+                    {/* Contenido */}
+                    <div className="property-card-content">
+                      {/* Título con icono casa */}
                       <h3 className="property-title" title={prop.titulo}>
-                        {prop.titulo.length > 50 ? prop.titulo.substring(0, 50) + '...' : prop.titulo}
+                        <Home className="property-title-icon" aria-hidden="true" />
+                        {prop.titulo.length > 35 ? prop.titulo.substring(0, 35) + '...' : prop.titulo}
                       </h3>
 
-                      {/* Ubicación */}
-                      <address className="property-location">
-                        <MapPin className="property-location-icon" aria-hidden="true" size={16} />
-                        <div>
-                          <p className="property-address">{prop.direccion}</p>
-                          <p className="property-city">
-                            {prop.barrio ? `${prop.barrio}, ` : ''}{prop.ciudad}
-                          </p>
-                        </div>
-                      </address>
-                      
                       {/* Características */}
                       <ul className="property-features-inline" aria-label="Características del inmueble">
                         {prop.areaConstruida > 0 && (
-                          <li>{prop.areaConstruida}m²</li>
+                          <li>
+                            <Maximize2 size={14} aria-hidden="true" />
+                            {prop.areaConstruida}m²
+                          </li>
                         )}
                         {prop.habitaciones > 0 && (
-                          <li>{prop.habitaciones} bed</li>
+                          <li>
+                            <Bed size={14} aria-hidden="true" />
+                            {prop.habitaciones} bed
+                          </li>
                         )}
                         {prop.banos > 0 && (
-                          <li>{prop.banos} bath</li>
+                          <li>
+                            <Bath size={14} aria-hidden="true" />
+                            {prop.banos} bath
+                          </li>
                         )}
                         {prop.parqueaderos > 0 && (
-                          <li>{prop.parqueaderos} car</li>
+                          <li>
+                            <Car size={14} aria-hidden="true" />
+                            {prop.parqueaderos} car
+                          </li>
                         )}
                       </ul>
                       
-                      {/* Footer */}
+                      {/* Footer - Precio y Botón */}
                       <footer className="property-footer">
-                        <div>
-                          <span className="property-price-label">
-                            {prop.operacion === 'SALE' ? 'Venta' : 'Renta'}
-                          </span>
+                        <div className="property-price-container">
                           <p className="property-price">{formatPrice(prop.precio)}</p>
+                          <p className="property-type-label">{prop.operacion === 'SALE' ? 'VENTA' : 'RENTA'}</p>
                         </div>
                         <button
                           className="property-btn"
