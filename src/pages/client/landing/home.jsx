@@ -3,6 +3,8 @@ import api from "../../../services/api";
 import "./homeStyles.css"
 import PropertyList from "../properties/propertyList/PropertyList";
 import SearchBar from '../../../components/SearchBar/';
+import videocasa from "../../../assets/videocasa.mp4"; 
+
 
 export default function Home() {
   const [query, setQuery] = useState("");
@@ -10,10 +12,10 @@ export default function Home() {
   useEffect(() => {
     api.get("/")
       .then((res) => {
-        console.log("✅ API conectada →", res.data);
+        console.log("API conectada →", res.data);
       })
       .catch((err) => {
-        console.error("⚠️ API disponible pero sin respuesta de verificación →", err);
+        console.error(" API disponible pero sin respuesta de verificación →", err);
       });
   }, []);
   
@@ -21,6 +23,18 @@ export default function Home() {
     <>
       {/* ===== HERO SECTION ===== */}
       <header className="home-container home-section">
+        {/* VIDEO DE FONDO */}
+        <video 
+          className="video-background-home"
+          autoPlay 
+          loop 
+          muted 
+          playsInline
+        >
+          <source src={videocasa} type="video/mp4" />
+          Tu navegador no soporta videos HTML5.
+        </video>
+
         <div className="overlay-home"></div>
 
         <div className="home-content">
