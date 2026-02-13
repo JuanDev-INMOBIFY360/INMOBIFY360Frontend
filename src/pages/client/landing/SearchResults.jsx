@@ -1,14 +1,50 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { ChevronDown, X } from 'lucide-react';
+import { X, MapPin, Bed, Bath, Car, Ruler, Eye, Home, Tag, Info, ChevronDown } from 'lucide-react';
 import { getProperties } from '../../../services/propertyService';
-
+import { getCountries, getDepartments } from '../../../services/LocationsService';
 import { normalizeForSearch } from '../../../utils/removeAccents';
 import './SearchResults.css';
 
 function useQuery() {
   return new URLSearchParams(useLocation().search);
 }
+
+// ✅ Helper para obtener ciudades y barrios únicos de las propiedades
+const extractLocationsFromProperties = (properties) => {
+  const cities = new Set();
+  const neighborhoods = new Set();
+  
+  properties.forEach(p => {
+    if (p.ciudad || p.city?.name) {
+      cities.add(JSON.stringify({
+        id: p.cityId || p.city?.id || p.ciudad,
+        name: p.ciudad || p.city?.name
+      }));
+    }
+    if (p.barrio || p.neighborhood?.name) {
+      neighborhoods.add(JSON.stringify({
+        id: p.neighborhoodId || p.neighborhood?.id || p.barrio,
+        name: p.barrio || p.neighborhood?.name,
+        cityId: p.cityId || p.city?.id
+      }));
+    }
+  });
+  
+  return {
+    cities: Array.from(cities).map(c => JSON.parse(c)),
+    neighborhoods: Array.from(neighborhoods).map(n => JSON.parse(n))
+  };
+};
+
+const formatPrice = (price) => {
+  if (!price) return 'Consultar';
+  return new Intl.NumberFormat('es-CO', { 
+    style: 'currency', 
+    currency: 'COP', 
+    minimumFractionDigits: 0 
+  }).format(price);
+};
 
 const SearchResults = () => {
   const query = useQuery();
@@ -19,12 +55,12 @@ const SearchResults = () => {
   const [error, setError] = useState(null);
   const navigate = useNavigate();
 
-  // API Data
-  const [cities, setCities] = useState([]);
+  // Datos de ubicación
   const [departments, setDepartments] = useState([]);
+  const [cities, setCities] = useState([]);
   const [neighborhoods, setNeighborhoods] = useState([]);
 
-  // Filters state
+  // Estado de filtros
   const [filters, setFilters] = useState({
     category: query.get('category') || '',
     type: query.get('type') || '',
@@ -37,95 +73,121 @@ const SearchResults = () => {
     estado: query.get('estado') || ''
   });
 
-  // Load initial data
+  // Estado para mostrar/ocultar filtros adicionales
+  const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
+
+  // ✅ Cargar datos iniciales
   useEffect(() => {
     setLoading(true);
     Promise.all([
       getProperties(),
-      getCities(),
-      getDepartments(),
-      getNeighborhoods()
+      getCountries()
     ])
-      .then(([propsData, citiesData, deptData, neighborhoodsData]) => {
-        if (Array.isArray(propsData)) setAll(propsData);
-        if (Array.isArray(citiesData)) setCities(citiesData);
-        if (Array.isArray(deptData)) setDepartments(deptData);
-        if (Array.isArray(neighborhoodsData)) setNeighborhoods(neighborhoodsData);
+      .then(async ([propsData, countriesData]) => {
+        if (Array.isArray(propsData)) {
+          console.log('📦 Propiedades cargadas:', propsData.length, propsData.slice(0, 2));
+          setAll(propsData);
+          
+          // Extraer ciudades y barrios de las propiedades
+          const { cities: extractedCities, neighborhoods: extractedNeighborhoods } = 
+            extractLocationsFromProperties(propsData);
+          
+          setCities(extractedCities);
+          setNeighborhoods(extractedNeighborhoods);
+        }
+        
+        // Obtener Colombia (país por defecto)
+        if (Array.isArray(countriesData) && countriesData.length > 0) {
+          const colombia = countriesData.find(c => c.name === 'Colombia') || countriesData[0];
+          if (colombia) {
+            try {
+              const deptData = await getDepartments(colombia.id);
+              if (Array.isArray(deptData)) setDepartments(deptData);
+            } catch (err) {
+              console.error('❌ Error cargando departamentos:', err);
+            }
+          }
+        }
       })
-      .catch((err) => setError(err.message || 'Error cargando datos'))
+      .catch((err) => {
+        console.error('❌ Error cargando datos:', err);
+        setError(err.message || 'Error cargando datos');
+      })
       .finally(() => setLoading(false));
   }, []);
 
-  // Compute unique filter options from properties
+  // ✅ Opciones únicas para filtros
   const options = useMemo(() => {
     return {
-      categories: [...new Set(all.map(p => p.operation?.name || p.tipo || '').filter(Boolean))],
+      categories: [...new Set(all.map(p => {
+        const op = p.operacion || p.operation?.name || '';
+        return op === 'SALE' ? 'Venta' : op === 'RENT' ? 'Arriendo' : op;
+      }).filter(Boolean))],
       types: [...new Set(all.map(p => p.typeProperty?.name || p.tipo || '').filter(Boolean))],
-      estados: [...new Set(all.map(p => p.estado || 'Nuevo').filter(Boolean))],
+      estados: [...new Set(all.map(p => p.estado || 'Usado').filter(Boolean))],
     };
   }, [all]);
 
-  // Apply filters + search query
+  // ✅ Aplicar filtros
   useEffect(() => {
     const term = normalizeForSearch(q);
     const filtered = all.filter(p => {
-      const haystack = normalizeForSearch(
-        `${p.titulo || ''} ${p.direccion || ''} ${p.city?.name || ''} ${p.department?.name || ''} ${p.typeProperty?.name || ''}`
-      );
-      if (term && !haystack.includes(term)) return false;
-
-      if (filters.category) {
-        const cat = normalizeForSearch(p.operation?.name || p.tipo || '');
-        if (!cat.includes(normalizeForSearch(filters.category))) return false;
+      // Búsqueda por texto
+      if (term) {
+        const haystack = normalizeForSearch(
+          `${p.titulo || ''} ${p.direccion || ''} ${p.ciudad || p.city?.name || ''} ${p.barrio || ''} ${p.typeProperty?.name || ''}`
+        );
+        if (!haystack.includes(term)) return false;
       }
+
+      // Filtro por categoría (Venta/Arriendo)
+      if (filters.category) {
+        const propCat = p.operacion === 'SALE' ? 'Venta' : p.operacion === 'RENT' ? 'Arriendo' : p.operacion;
+        if (normalizeForSearch(propCat) !== normalizeForSearch(filters.category)) return false;
+      }
+
+      // Filtro por tipo
       if (filters.type) {
         const t = normalizeForSearch(p.typeProperty?.name || p.tipo || '');
         if (!t.includes(normalizeForSearch(filters.type))) return false;
       }
+
+      // Filtro por ciudad
       if (filters.city) {
-        const isId = /^\d+$/.test(String(filters.city));
-        if (isId) {
-          const cityId = p.city?.id ?? p.cityId ?? p.ciudadId;
-          if (!cityId || String(cityId) !== String(filters.city)) return false;
-        } else {
-          const c = normalizeForSearch(p.city?.name || p.ciudad || '');
-          if (!c.includes(normalizeForSearch(filters.city))) return false;
-        }
+        const propCity = normalizeForSearch(p.ciudad || p.city?.name || '');
+        if (!propCity.includes(normalizeForSearch(filters.city))) return false;
       }
+
+      // Filtro por departamento
       if (filters.department) {
-        const isId = /^\d+$/.test(String(filters.department));
-        if (isId) {
-          const deptId = p.department?.id ?? p.departmentId;
-          if (!deptId || String(deptId) !== String(filters.department)) return false;
-        } else {
-          const d = normalizeForSearch(p.department?.name || '');
-          if (!d.includes(normalizeForSearch(filters.department))) return false;
-        }
+        const propDept = normalizeForSearch(p.department?.name || '');
+        if (!propDept.includes(normalizeForSearch(filters.department))) return false;
       }
+
+      // Filtro por barrio
       if (filters.barrio) {
-        const isId = /^\d+$/.test(String(filters.barrio));
-        if (isId) {
-          const neighId = p.neighborhood?.id ?? p.neighborhoodId ?? p.barrioId ?? null;
-          if (!neighId || String(neighId) !== String(filters.barrio)) return false;
-        } else {
-          const b = normalizeForSearch(p.barrio || p.neighborhood?.name || '');
-          if (!b.includes(normalizeForSearch(filters.barrio))) return false;
-        }
+        const propBarrio = normalizeForSearch(p.barrio || p.neighborhood?.name || '');
+        if (!propBarrio.includes(normalizeForSearch(filters.barrio))) return false;
       }
+
+      // Filtro por estado
       if (filters.estado) {
-        const e = normalizeForSearch(p.estado || '');
-        if (!e.includes(normalizeForSearch(filters.estado))) return false;
+        if (normalizeForSearch(p.estado || 'Usado') !== normalizeForSearch(filters.estado)) return false;
       }
+
+      // Filtro por habitaciones
       if (filters.habitaciones) {
-        const h = Number(p.habitaciones || p.rooms || 0);
-        if (isNaN(Number(filters.habitaciones)) || h < Number(filters.habitaciones)) return false;
+        const h = Number(p.habitaciones || 0);
+        if (h < Number(filters.habitaciones)) return false;
       }
+
+      // Filtro por precio
       if (filters.minPrice) {
-        const price = Number(p.precio || p.price || 0);
+        const price = Number(p.precio || 0);
         if (price < Number(filters.minPrice)) return false;
       }
       if (filters.maxPrice) {
-        const price = Number(p.precio || p.price || 0);
+        const price = Number(p.precio || 0);
         if (price > Number(filters.maxPrice)) return false;
       }
 
@@ -134,6 +196,7 @@ const SearchResults = () => {
     setResults(filtered);
   }, [all, q, filters]);
 
+  // ✅ Limpiar todos los filtros
   const clearFilters = () => {
     setFilters({
       category: '',
@@ -148,90 +211,94 @@ const SearchResults = () => {
     });
   };
 
-  // Get active filters for display
+  // ✅ Filtros activos para mostrar badges
   const activeFilters = Object.entries(filters).filter(([_, v]) => v);
 
-  // Filtered lists based on selection dependencies
+  // ✅ Ciudades filtradas por departamento
   const filteredCities = useMemo(() => {
     if (!filters.department) return cities;
-    return cities.filter(c => {
-      // city may have departmentId or department?.id
-      const depId = c.departmentId ?? c.department?.id ?? c.departmentId;
-      return String(depId) === String(filters.department) || String(c.department?.name) === String(filters.department);
-    });
-  }, [cities, filters.department]);
+    const dept = departments.find(d => d.name === filters.department);
+    if (!dept) return cities;
+    return cities.filter(c => c.departmentId === dept.id);
+  }, [filters.department, cities, departments]);
 
+  // ✅ Barrios filtrados por ciudad
   const filteredNeighborhoods = useMemo(() => {
     if (!filters.city) return neighborhoods;
-    return neighborhoods.filter(n => {
-      const cityId = n.cityId ?? n.city?.id;
-      return String(cityId) === String(filters.city) || String(n.city?.name) === String(filters.city);
-    });
-  }, [neighborhoods, filters.city]);
+    const city = cities.find(c => c.name === filters.city);
+    if (!city) return neighborhoods;
+    return neighborhoods.filter(n => n.cityId === city.id);
+  }, [filters.city, neighborhoods, cities]);
 
-  const getFilterLabel = (key, value) => {
-    if (!value) return '';
-    if (key === 'department') {
-      const d = departments.find(x => String(x.id) === String(value) || String(x.name) === String(value));
-      return d ? d.name : value;
-    }
-    if (key === 'city') {
-      const c = cities.find(x => String(x.id) === String(value) || String(x.name) === String(value));
-      return c ? c.name : value;
-    }
-    if (key === 'barrio') {
-      const n = neighborhoods.find(x => String(x.id) === String(value) || String(x.name) === String(value));
-      return n ? n.name : value;
-    }
-    return value;
+  const handleViewProperty = (id) => {
+    console.log('🔗 Navigating to property:', id);
+    navigate(`/properties/${id}`);
   };
 
-  if (loading) return <div className="search-results-page"><p>Cargando resultados...</p></div>;
-  if (error) return <div className="search-results-page"><p style={{ color: 'red' }}>Error: {error}</p></div>;
+  if (loading) return <div className="search-loading">Cargando propiedades...</div>;
+  if (error) return <div className="search-error">Error: {error}</div>;
 
   return (
     <main className="search-results-page">
-      {/* Header */}
-      <header className="search-results-header">
-        <h1>{results.length} Inmuebles encontrados</h1>
-      </header>
-
       <div className="search-results-container">
-        {/* Sidebar Filters */}
-        <aside className="search-filters-sidebar">
-          <section className="filters-section">
-            <h2 className="filters-title">Encuentra tu Inmueble</h2>
-            {activeFilters.length > 0 && (
-              <button className="clear-all-btn" onClick={clearFilters}>
-                <X size={16} /> Borrar Filtros
-              </button>
-            )}
-          </section>
+        {/* Sidebar de Filtros */}
+        <aside className="search-sidebar">
+          {/* Header */}
+          <div className="sidebar-header">
+            <div className="sidebar-title">
+              <h1>Buscar por ciudad</h1>
+             
+            </div>
+          </div>
+
+          {/* City Search Input */}
+          <div className="city-search-box">
+            <input
+              type="text"
+              placeholder="Ingresa una ciudad"
+              value={filters.city}
+              onChange={(e) => setFilters(prev => ({ ...prev, city: e.target.value, barrio: '' }))}
+              className="city-search-input"
+            />
+          </div>
+
+          {/* Contador de resultados */}
+          <div className="results-count">
+            <span className="count-text">Inmuebles encontrados</span>
+            <span className="count-number">{results.length}</span>
+          </div>
+
+          {/* Limpiar filtros */}
+          {activeFilters.length > 0 && (
+            <button className="clear-all-btn" onClick={clearFilters}>
+              Borrar Filtros
+            </button>
+          )}
 
           {/* Categorías */}
-          <section className="filter-group">
-            <label className="filter-label">Categorías</label>
+          <section className="filter-section">
+            <h3 className="filter-section-title">Categorías</h3>
             <div className="filter-chips">
-              {options.categories.map((c) => (
+              {options.categories.map((cat) => (
                 <button
-                  key={c}
-                  className={`chip ${filters.category === c ? 'active' : ''}`}
-                  onClick={() => setFilters(prev => ({ ...prev, category: prev.category === c ? '' : c }))}
+                  key={cat}
+                  className={`filter-chip ${filters.category === cat ? 'active' : ''}`}
+                  onClick={() => setFilters(prev => ({ ...prev, category: prev.category === cat ? '' : cat }))}
                 >
-                  {c}
+                  {cat}
                 </button>
               ))}
             </div>
           </section>
 
           {/* Tipo de inmueble */}
-          <section className="filter-group">
-            <label className="filter-label">Tipo de inmueble</label>
+          <section className="filter-section">
+            <h3 className="filter-section-title">Tipo de inmueble</h3>
             <div className="filter-chips">
               {options.types.map((t) => (
                 <button
                   key={t}
-                  className={`chip ${filters.type === t ? 'active' : ''}`}
+                  className={`filter-chip ${filters.type === t ? 'active' : ''}`}
                   onClick={() => setFilters(prev => ({ ...prev, type: prev.type === t ? '' : t }))}
                 >
                   {t}
@@ -241,13 +308,13 @@ const SearchResults = () => {
           </section>
 
           {/* Estado del inmueble */}
-          <section className="filter-group">
-            <label className="filter-label">Estado del inmueble</label>
+          <section className="filter-section">
+            <h3 className="filter-section-title">Estado del inmueble</h3>
             <div className="filter-chips">
               {options.estados.map((e) => (
                 <button
                   key={e}
-                  className={`chip ${filters.estado === e ? 'active' : ''}`}
+                  className={`filter-chip ${filters.estado === e ? 'active' : ''}`}
                   onClick={() => setFilters(prev => ({ ...prev, estado: prev.estado === e ? '' : e }))}
                 >
                   {e}
@@ -256,152 +323,174 @@ const SearchResults = () => {
             </div>
           </section>
 
-          {/* Zona */}
-          <section className="filter-group">
-            <label className="filter-label">Departamento</label>
-            <select
-              value={filters.department}
-              onChange={(e) => setFilters(prev => ({ ...prev, department: e.target.value, city: '', barrio: '' }))}
-              className="filter-select"
-            >
-              <option value="">Todos los departamentos</option>
-              {departments.map(d => <option key={d.id} value={d.id}>{d.name}</option>)}
-            </select>
-          </section>
-
-          {/* Ciudad */}
-          <section className="filter-group">
-            <label className="filter-label">Ciudad</label>
-            <select
-              value={filters.city}
-              onChange={(e) => setFilters(prev => ({ ...prev, city: e.target.value, barrio: '' }))}
-              className="filter-select"
-            >
-              <option value="">Todas las ciudades</option>
-              {filteredCities.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-            </select>
-          </section>
-
-          {/* Barrio/Zona */}
-          <section className="filter-group">
-            <label className="filter-label">Barrio/Zona</label>
-            <select
-              value={filters.barrio}
-              onChange={(e) => setFilters(prev => ({ ...prev, barrio: e.target.value }))}
-              className="filter-select"
-            >
-              <option value="">Todos los barrios</option>
-              {filteredNeighborhoods.map(n => <option key={n.id} value={n.id}>{n.name}</option>)}
-            </select>
-          </section>
-
-          {/* Rango de precios */}
-          <section className="filter-group">
-            <label className="filter-label">Rango de precios (COP)</label>
-            <div className="price-inputs">
-              <input
-                type="number"
-                placeholder="Min $"
-                value={filters.minPrice}
-                onChange={(e) => setFilters(prev => ({ ...prev, minPrice: e.target.value }))}
-                className="price-input"
-              />
-              <input
-                type="number"
-                placeholder="Max $"
-                value={filters.maxPrice}
-                onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: e.target.value }))}
-                className="price-input"
-              />
-            </div>
-            {filters.minPrice && filters.maxPrice && (
-              <p className="price-range-label">Min ${Number(filters.minPrice).toLocaleString()} – Max ${Number(filters.maxPrice).toLocaleString()}</p>
-            )}
-          </section>
-
-          {/* Habitaciones */}
-          <section className="filter-group">
-            <label className="filter-label">Habitaciones mínimas</label>
-            <input
-              type="number"
-              min="0"
-              value={filters.habitaciones}
-              onChange={(e) => setFilters(prev => ({ ...prev, habitaciones: e.target.value }))}
-              className="filter-select"
+          {/* Botón de Filtros Avanzados */}
+          <button 
+            className="advanced-filters-toggle"
+            onClick={() => setShowAdvancedFilters(!showAdvancedFilters)}
+          >
+            <span>Filtros avanzados</span>
+            <ChevronDown 
+              size={16} 
+              className={`chevron ${showAdvancedFilters ? 'rotated' : ''}`}
             />
-          </section>
+          </button>
+
+          {/* Filtros Avanzados */}
+          {showAdvancedFilters && (
+            <div className="advanced-filters">
+              {/* Departamento */}
+              <section className="filter-section">
+                <label className="filter-label">Departamento</label>
+                <select
+                  value={filters.department}
+                  onChange={(e) => setFilters(prev => ({ ...prev, department: e.target.value, city: '', barrio: '' }))}
+                  className="filter-select"
+                >
+                  <option value="">Todos</option>
+                  {departments.map(d => <option key={d.id} value={d.name}>{d.name}</option>)}
+                </select>
+              </section>
+
+              {/* Ciudad */}
+              <section className="filter-section">
+                <label className="filter-label">Ciudad</label>
+                <select
+                  value={filters.city}
+                  onChange={(e) => setFilters(prev => ({ ...prev, city: e.target.value, barrio: '' }))}
+                  className="filter-select"
+                >
+                  <option value="">Todas</option>
+                  {filteredCities.map(c => <option key={c.id || c.name} value={c.name}>{c.name}</option>)}
+                </select>
+              </section>
+
+              {/* Rango de precios */}
+              <section className="filter-section">
+                <label className="filter-label">Rango de precios</label>
+                <div className="price-inputs-vertical">
+                  <input
+                    type="number"
+                    placeholder="Precio mínimo"
+                    value={filters.minPrice}
+                    onChange={(e) => setFilters(prev => ({ ...prev, minPrice: e.target.value }))}
+                    className="price-input"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Precio máximo"
+                    value={filters.maxPrice}
+                    onChange={(e) => setFilters(prev => ({ ...prev, maxPrice: e.target.value }))}
+                    className="price-input"
+                  />
+                </div>
+              </section>
+
+              {/* Habitaciones */}
+              <section className="filter-section">
+                <label className="filter-label">Habitaciones mínimas</label>
+                <input
+                  type="number"
+                  min="0"
+                  placeholder="0"
+                  value={filters.habitaciones}
+                  onChange={(e) => setFilters(prev => ({ ...prev, habitaciones: e.target.value }))}
+                  className="filter-select"
+                />
+              </section>
+            </div>
+          )}
         </aside>
 
-        {/* Main Content */}
-        <section className="search-results-main">
-          {/* Active Filters Display */}
+        {/* Contenido Principal */}
+        <section className="search-main">
+          {/* Filtros Activos */}
           {activeFilters.length > 0 && (
-            <nav className="active-filters" aria-label="Filtros aplicados">
-              <strong>Filtros aplicados:</strong>
-              {activeFilters.map(([key, value]) => (
-                <span key={key} className="filter-badge">
-                  {key}: {getFilterLabel(key, value)}
+            <div className="active-filters-bar">
+              <span className="active-filters-label">Filtros:</span>
+              <div className="active-filters-list">
+                {activeFilters.map(([key, value]) => (
                   <button
+                    key={key}
+                    className="filter-badge"
                     onClick={() => {
-                      if (key === 'department') setFilters(prev => ({ ...prev, department: '', city: '', barrio: '' }));
-                      else if (key === 'city') setFilters(prev => ({ ...prev, city: '', barrio: '' }));
-                      else setFilters(prev => ({ ...prev, [key]: '' }));
+                      if (key === 'department') {
+                        setFilters(prev => ({ ...prev, department: '', city: '', barrio: '' }));
+                      } else if (key === 'city') {
+                        setFilters(prev => ({ ...prev, city: '', barrio: '' }));
+                      } else {
+                        setFilters(prev => ({ ...prev, [key]: '' }));
+                      }
                     }}
-                    aria-label={`Remover filtro ${key}`}
                   >
-                    <X size={12} />
+                    <span>{value}</span>
+                    <X size={14} />
                   </button>
-                </span>
-              ))}
-            </nav>
+                ))}
+              </div>
+            </div>
           )}
 
-          {/* Sorting */}
-          <div className="results-toolbar">
-            <div />
-            <div className="sort-control">
-              <label htmlFor="sort-select">Ordenar por</label>
-              <select id="sort-select" className="sort-select">
-                <option>Más Relevantes</option>
-                <option>Precio: menor a mayor</option>
-                <option>Precio: mayor a menor</option>
-                <option>Más recientes</option>
-              </select>
-            </div>
-          </div>
-
-          {/* Properties Grid */}
+          {/* Resultados */}
           {results.length === 0 ? (
-            <div style={{ textAlign: 'center', padding: '40px', color: '#999' }}>
-              No se encontraron propiedades con los filtros seleccionados.
+            <div className="no-results">
+              <h2>No se encontraron propiedades</h2>
+              <p>Intenta ajustar los filtros para ver más resultados</p>
             </div>
           ) : (
-            <section className="properties-grid">
-              {results.map((p) => (
-                <article key={p.id} className="property-card">
-                  <div className="property-card-image">
-                    <img
-                      src={p.imagenes?.[0]?.url || p.imagen || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop'}
-                      alt={p.direccion || p.titulo}
-                    />
-                    <span className="property-badge">{p.estado || 'Usado'}</span>
-                  </div>
-                  <div className="property-card-body">
-                    <p className="property-source">Tu360inmobiliario - {p.estado || 'Usado'}</p>
-                    <h3 className="property-title">{p.titulo || p.typeProperty?.name || 'Propiedad'}</h3>
-                    <p className="property-location">
-                      {p.city?.name || p.ciudad} | {p.area}m² | {p.habitaciones || 0} hab
-                    </p>
-                    <p className="property-price">
-                      ${new Intl.NumberFormat('es-CO', { minimumFractionDigits: 0 }).format(p.precio || 0)}
-                    </p>
-                    <button className="property-btn" onClick={() => navigate(`/properties/${p.id}`)}>
-                      Ver detalle
-                    </button>
-                  </div>
-                </article>
-              ))}
-            </section>
+            <div className="properties-grid">
+              {results.map((p) => {
+                return (
+                  <article key={p.id} className="property-card">
+                    <div className="property-image">
+                      <img
+                        src={
+                          p.images?.find(img => img.isPrimary)?.url ||
+                          p.images?.[0]?.url ||
+                          'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800&h=600&fit=crop'
+                        }
+                        alt={p.titulo}
+                        onError={(e) => {
+                          e.target.src = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%22400%22 height=%22300%22%3E%3Crect fill=%22%23e2e8f0%22 width=%22400%22 height=%22300%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2218%22 fill=%22%23718096%22 text-anchor=%22middle%22%3ESin imagen%3C/text%3E%3C/svg%3E';
+                        }}
+                        onLoad={() => {}}
+                      />
+                      <span className="property-badge">{p.estado || 'Usado'}</span>
+                    </div>
+                    <div className="property-content">
+                      <h3 className="property-title">{p.titulo || p.typeProperty?.name || 'Propiedad'}</h3>
+                      <p className="property-location-a">
+                        <MapPin size={14} /> {p.ciudad || p.city?.name}
+                      </p>
+                      <div className="property-specs">
+                        <div className="spec">
+                          <Ruler size={16} />
+                          <span>{p.areaConstruida || 0}m²</span>
+                        </div>
+                        <div className="spec">
+                          <Bed size={16} />
+                          <span>{p.habitaciones || 0}</span>
+                        </div>
+                        <div className="spec">
+                          <Bath size={16} />
+                          <span>{p.banos || 0}</span>
+                        </div>
+                        <div className="spec">
+                          <Car size={16} />
+                          <span>{p.parqueaderos || 0}</span>
+                        </div>
+                      </div>
+                      <p className="property-price">{formatPrice(p.precio)}</p>
+                      <button 
+                        className="property-btn" 
+                        onClick={() => handleViewProperty(p.id)}
+                      >
+                        Ver detalle
+                      </button>
+                    </div>
+                  </article>
+                );
+              })}
+            </div>
           )}
         </section>
       </div>

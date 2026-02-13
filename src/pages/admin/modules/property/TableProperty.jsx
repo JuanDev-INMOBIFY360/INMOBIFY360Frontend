@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import PropertyCard from "./PropertyCard";
-import { getProperties, getProperty, createProperty, updateProperty } from "../../../../services/propertyService";
+import { getProperties, getProperty, createProperty, updateProperty, deleteProperty } from "../../../../services/propertyService";
 import FormProperty from "./propertyForm.jsx";
 import "../../GlobalStyles/globalStyles.css";
 import "./propertyCards.css";
@@ -86,6 +86,21 @@ export default function TableProperty() {
     }
   };
 
+  const handleDeleteProperty = async (propertyId) => {
+    if (window.confirm("¿Estás seguro de que deseas eliminar esta propiedad? Esta acción no se puede deshacer.")) {
+      try {
+        setLoading(true);
+        await deleteProperty(propertyId);
+        await fetchProperties();
+      } catch (error) {
+        console.error("Error deleting property:", error);
+        alert("Error al eliminar la propiedad");
+      } finally {
+        setLoading(false);
+      }
+    }
+  };
+
   if (loading) return <p>Cargando propiedades...</p>;
 
   return (
@@ -125,6 +140,7 @@ export default function TableProperty() {
               property={property}
               onEdit={() => handleOpenModal(property)}
               onView={() => navigate(`/properties/${property.id}`)}
+              onDelete={() => handleDeleteProperty(property.id)}
             />
           ))}
         </div>

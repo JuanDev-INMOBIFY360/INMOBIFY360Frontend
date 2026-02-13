@@ -10,9 +10,8 @@ import {
   Home,
 } from "lucide-react";
 import { getProperties } from "../../../../services/propertyService";
-import { searchByType } from "../../../../utils/searchHelpers";
-import "./PropertyCarousel.css";
 import { useNavigate } from "react-router-dom";
+import "./PropertyCarousel.css";
 
 const PropertyCarousel = () => {
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -28,7 +27,7 @@ const PropertyCarousel = () => {
   useEffect(() => {
     getProperties()
       .then((data) => {
-        console.log(" Propiedades recibidas:", data);
+        console.log("✅ Propiedades recibidas:", data);
 
         const publishedProperties = Array.isArray(data)
           ? data.filter((prop) => prop.publicada !== false)
@@ -57,7 +56,7 @@ const PropertyCarousel = () => {
         setProperties(transformedProperties);
       })
       .catch((err) => {
-        console.error(" Error cargando propiedades:", err);
+        console.error("❌ Error cargando propiedades:", err);
         setError(err.message);
       })
       .finally(() => setLoading(false));
@@ -84,8 +83,16 @@ const PropertyCarousel = () => {
     }).format(price);
   };
 
+  // ✅ CORRECCIÓN: Navegación correcta a la ruta /properties/:id
   const handleViewMore = (propertyId) => {
-    navigate(`/property/${propertyId}`);
+    console.log("🔗 Navegando a propiedad:", propertyId);
+    navigate(`/properties/${propertyId}`);
+  };
+
+  // ✅ CORRECCIÓN: Búsqueda por tipo
+  const handleSearchByType = (typeName) => {
+    console.log("🔍 Buscando por tipo:", typeName);
+    navigate(`/search?type=${encodeURIComponent(typeName)}`);
   };
 
   if (loading) {
@@ -166,7 +173,6 @@ const PropertyCarousel = () => {
                 <article
                   key={prop.id}
                   className="card-property-client"
-                 
                   role="listitem"
                 >
                   <div className="card-inner-property-client">
@@ -196,12 +202,12 @@ const PropertyCarousel = () => {
                         </button>
                       </div>
 
-                      {/* Badge tipo */}
+                      {/* Badge tipo - ahora clickeable para buscar */}
                       <button
                         className="badge-property-client"
                         onClick={(e) => {
-                          e.preventDefault();
-                          navigate(searchByType(prop.typeProperty));
+                          e.stopPropagation();
+                          handleSearchByType(prop.typeProperty);
                         }}
                         aria-label={`Filtrar por ${prop.typeProperty}`}
                       >
@@ -264,7 +270,7 @@ const PropertyCarousel = () => {
                         )}
                         {prop.parqueaderos > 0 && (
                           <li>
-                            <Car aria-hidden="true"/>
+                            <Car aria-hidden="true" />
                             {prop.parqueaderos}
                           </li>
                         )}
@@ -315,6 +321,7 @@ const PropertyCarousel = () => {
           ))}
         </div>
 
+        {/* CTA Ver todas */}
         <div className="cta-property-carousel-client">
           <button
             className="cta-btn-property-carousel-client"

@@ -120,6 +120,31 @@
   transform: scale(1.05);
 }
 
+/* ===== DARK VARIANT ===== */
+.search-bar--dark {
+  background: #000;
+  color: #fff;
+}
+.search-bar--dark .search-bar__input,
+.search-bar--dark .search-bar__input--compact {
+  color: #fff;
+}
+.search-bar--dark .search-bar__input::placeholder,
+.search-bar--dark .search-bar__input--compact::placeholder {
+  color: rgba(255,255,255,0.6);
+}
+.search-bar--dark .search-bar__icon {
+  color: #fff;
+}
+.search-bar--dark .search-bar__button,
+.search-bar--dark .search-bar__button--compact {
+  background: #fff;
+  color: #000;
+}
+.search-bar--dark .search-bar__button:hover {
+  background: #f0f0f0;
+}
+
 /* ===== RESPONSIVE ===== */
 @media (max-width: 768px) {
   .search-bar--hero {

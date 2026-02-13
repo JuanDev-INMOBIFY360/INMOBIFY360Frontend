@@ -126,6 +126,7 @@ export default function FormProperty({ isOpen, onClose, propertyToEdit, onSave }
         images,
         selectedCommonAreas,
         propertyNearby,
+        isEdit: Boolean(propertyToEdit),
       });
 
       await onSave(payload);

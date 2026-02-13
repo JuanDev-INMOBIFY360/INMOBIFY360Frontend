@@ -3,11 +3,12 @@ export function buildPropertyPayload({
   images,
   selectedCommonAreas,
   propertyNearby,
+  isEdit = false,
 }) {
-  // Separar imágenes existentes de las nuevas
+  // imágenes que ya estaban guardadas (solo usadas al editar)
   const existingImages = images
-    .filter(img => img.isExisting)
-    .map(img => ({
+    .filter((img) => img.isExisting)
+    .map((img) => ({
       id: img.id,
       url: img.url,
       publicId: img.publicId,
@@ -15,14 +16,16 @@ export function buildPropertyPayload({
       order: img.order,
     }));
 
+  // imágenes nuevas que se van a subir (base64)
   const newImages = images
-    .filter(img => !img.isExisting && img.base64)
-    .map(img => ({
+    .filter((img) => !img.isExisting && img.base64)
+    .map((img) => ({
       base64: img.base64,
       isPrimary: img.isPrimary,
+      order: img.order,
     }));
 
-  return {
+  const base = {
     ...formData,
     precio: Number(formData.precio),
     habitaciones: Number(formData.habitaciones),
@@ -35,8 +38,19 @@ export function buildPropertyPayload({
     typePropertyId: Number(formData.typePropertyId),
     commonAreaIds: selectedCommonAreas,
     nearbyPlaces: propertyNearby,
-    // Incluir tanto imágenes existentes como nuevas
-    existingImages,
-    newImages,
+  };
+
+  if (isEdit) {
+    return {
+      ...base,
+      existingImages,
+      newImages,
+    };
+  }
+
+  // en creación enviamos solo images para que el servicio las suba
+  return {
+    ...base,
+    images: newImages,
   };
 }

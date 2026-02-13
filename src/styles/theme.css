@@ -2,6 +2,10 @@
    Paleta: Dorado, Amarillo, Negro, Gris, Blanco, Verde
    Diseño amigable y moderno para usuarios inmobiliarios
 */
+
+/* Import Google family used across the app */
+@import url('https://fonts.googleapis.com/css2?family=Alice&display=swap');
+
 :root {
   /* ===== PALETA PRINCIPAL ===== */
   /* Dorados - Lujo y confianza */
@@ -95,7 +99,7 @@
   --radius-full: 9999px;
 
   /* ===== TIPOGRAFÍA ===== */
-  --font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
+  --font-family: 'Alice', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', sans-serif;
   --font-mono: 'Monaco', 'Courier New', monospace;
 
   --text-xs: 0.75rem;
@@ -158,7 +162,7 @@ html,body,#root{
 }
 body{
   margin:0;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+  font-family: var(--font-family);
   background: var(--color-bg);
   color: var(--color-text);
   -webkit-font-smoothing:antialiased;
