@@ -27,7 +27,7 @@ const PropertyCarousel = () => {
   useEffect(() => {
     getProperties()
       .then((data) => {
-        console.log("✅ Propiedades recibidas:", data);
+        console.log("Propiedades recibidas:", data);
 
         const publishedProperties = Array.isArray(data)
           ? data.filter((prop) => prop.publicada !== false)
@@ -56,7 +56,7 @@ const PropertyCarousel = () => {
         setProperties(transformedProperties);
       })
       .catch((err) => {
-        console.error("❌ Error cargando propiedades:", err);
+        console.error("Error cargando propiedades:", err);
         setError(err.message);
       })
       .finally(() => setLoading(false));
@@ -83,15 +83,15 @@ const PropertyCarousel = () => {
     }).format(price);
   };
 
-  // ✅ CORRECCIÓN: Navegación correcta a la ruta /properties/:id
+  // Navegación correcta a la ruta /properties/:id
   const handleViewMore = (propertyId) => {
-    console.log("🔗 Navegando a propiedad:", propertyId);
+    console.log("Navegando a propiedad:", propertyId);
     navigate(`/properties/${propertyId}`);
   };
 
-  // ✅ CORRECCIÓN: Búsqueda por tipo
+  // Búsqueda por tipo
   const handleSearchByType = (typeName) => {
-    console.log("🔍 Buscando por tipo:", typeName);
+    console.log("Buscando por tipo:", typeName);
     navigate(`/search?type=${encodeURIComponent(typeName)}`);
   };
 
@@ -213,6 +213,12 @@ const PropertyCarousel = () => {
                       >
                         {prop.typeProperty.toUpperCase()} | DISPONIBLE
                       </button>
+
+                      {/* Ubicación overlay */}
+                      <span className="property-city-overlay-client">
+                        <MapPin size={12} aria-hidden="true" />
+                        {prop.ciudad}
+                      </span>
                     </div>
 
                     {/* Contenido */}

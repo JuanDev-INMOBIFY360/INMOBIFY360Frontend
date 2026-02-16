@@ -5,7 +5,7 @@ export const getPermissions = async () => {
     const res = await api.get('/api/permissions');
     return res.data;
   } catch (err) {
-    console.error('❌ Error fetching permissions:', err);
+    console.error('Error fetching permissions:', err);
     throw err;
   }
 };

@@ -17,32 +17,32 @@ const PropertyDetail = () => {
   const PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%221200%22 height=%22800%22%3E%3Crect fill=%22%23F8F8F8%22 width=%221200%22 height=%22800%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2248%22 font-weight=%22600%22 fill=%22%23999999%22 text-anchor=%22middle%22 dy=%22.3em%22%3ESin imagen disponible%3C/text%3E%3C/svg%3E';
 
   // Número de WhatsApp para contacto
-  const WHATSAPP_NUMBER = '+573101234567';
+  const WHATSAPP_NUMBER = '+57 314 8395860';
 
   useEffect(() => {
-    console.log('🔍 PropertyDetail montado con ID:', id);
+    console.log('PropertyDetail montado con ID:', id);
     
     if (!id) {
-      console.error('❌ No hay id en los params');
+      console.error('No hay id en los params');
       setLoading(false);
       return;
     }
 
     const loadProperty = async () => {
       try {
-        console.log('📡 Llamando a getProperty con ID:', id);
+        console.log('Llamando a getProperty con ID:', id);
         const data = await getProperty(id);
-        console.log('✅ Propiedad cargada:', data);
+        console.log('Propiedad cargada:', data);
         
         if (!data) {
-          console.error('❌ getProperty retornó null o undefined');
+          console.error('getProperty retornó null o undefined');
           setProperty(null);
         } else {
           setProperty(data);
         }
       } catch (err) {
-        console.error('❌ Error cargando propiedad:', err);
-        console.error('❌ Error details:', err.response?.data || err.message);
+        console.error('Error cargando propiedad:', err);
+        console.error('Error details:', err.response?.data || err.message);
         setProperty(null);
       } finally {
         setLoading(false);
@@ -56,12 +56,12 @@ const PropertyDetail = () => {
     if (!property) return [PLACEHOLDER_IMAGE];
     
     if (!property.images || !Array.isArray(property.images) || property.images.length === 0) {
-      console.log('⚠️ No hay imágenes, usando placeholder');
+      console.log('No hay imágenes, usando placeholder');
       return [PLACEHOLDER_IMAGE];
     }
     
     const urls = property.images.map(img => img.url || img).filter(Boolean);
-    console.log('🖼️ URLs de imágenes:', urls);
+    console.log('URLs de imágenes:', urls);
     return urls.length > 0 ? urls : [PLACEHOLDER_IMAGE];
   };
 
@@ -119,7 +119,7 @@ const PropertyDetail = () => {
 
   const handleCopyLink = () => {
     navigator.clipboard.writeText(window.location.href);
-    alert('✓ Enlace copiado al portapapeles');
+    alert('Enlace copiado al portapapeles');
   };
 
   if (loading) {
@@ -137,7 +137,7 @@ const PropertyDetail = () => {
     return (
       <div className="detail-loading">
         <p style={{fontSize: '16px', fontWeight: '600', marginBottom: '12px'}}>
-          ❌ Propiedad no encontrada
+           Propiedad no encontrada
         </p>
         <p style={{fontSize: '14px', color: '#666', marginBottom: '24px'}}>
           ID: {id}
@@ -213,7 +213,7 @@ const PropertyDetail = () => {
                     alt={property.titulo}
                     className="gallery-main-image"
                     onError={(e) => { 
-                      console.error('❌ Error cargando imagen:', e.target.src);
+                      console.error('Error cargando imagen:', e.target.src);
                       e.target.src = PLACEHOLDER_IMAGE; 
                     }}
                   />

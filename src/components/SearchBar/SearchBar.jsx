@@ -1,64 +1,120 @@
-import React, { useState } from 'react';
-import { Search, MapPin, Home } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import './SearchBar.css';
+import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import "./SearchBar.css";
 
-const SearchBar = ({ initialValue = '', variant = 'hero' }) => {
-  const [query, setQuery] = useState(initialValue);
-  const [searchType, setSearchType] = useState('all'); // 'all', 'city', 'type'
+const SearchBar = ({
+  variant = "hero",
+  cities = [],
+  propertyTypes = [],
+  onSearch,
+}) => {
+  const [city, setCity] = useState("");
+  const [typeProp, setTypeProp] = useState("");
+  const [category, setCategory] = useState("");
   const navigate = useNavigate();
 
-  const onSubmit = (e) => {
+  const handleSubmit = (e) => {
     e.preventDefault();
-    const q = query.trim();
-    if (!q) return;
+
+    if (!city && !typeProp && !category) return;
 
     const params = new URLSearchParams();
-    params.set('q', q);
-    if (searchType !== 'all') {
-      params.set('type', searchType);
+    if (city) params.set("city", city);
+    if (typeProp) params.set("type", typeProp);
+    if (category) params.set("category", category);
+
+    if (onSearch) {
+      onSearch({ city, typeProp, category });
+    } else {
+      navigate(`/search?${params.toString()}`);
     }
-    
-    navigate(`/search?${params.toString()}`);
   };
 
-  if (variant === 'hero') {
+  const handleClear = () => {
+    setCity("");
+    setTypeProp("");
+    setCategory("");
+  };
+
+  const hasFilters = city || typeProp || category;
+
+  if (variant === "hero") {
     return (
-      <form className="search-bar search-bar--hero" onSubmit={onSubmit}>
-        <div className="search-bar__input-group">
-          <Search className="search-bar__icon" size={20} aria-hidden="true" />
-          <input
-            className="search-bar__input"
-            type="text"
-            placeholder="Busca por dirección, zona o nombre..."
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            aria-label="Buscar propiedades"
-          />
+      <form className="search-bar search-bar--hero" onSubmit={handleSubmit}>
+        <div className="search-bar__filters">
+          <div className="search-bar__filter">
+            <label className="search-bar__label">
+              <span>Ciudad</span>
+            </label>
+            <select
+              value={city}
+              onChange={(e) => setCity(e.target.value)}
+              className="search-bar__select"
+            >
+              <option value="">Todas las ciudades</option>
+              {cities.map((c) => (
+                <option key={c} value={c}>
+                  {c}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="search-bar__filter">
+            <label className="search-bar__label">
+              <span>Tipo</span>
+            </label>
+            <select
+              value={typeProp}
+              onChange={(e) => setTypeProp(e.target.value)}
+              className="search-bar__select"
+            >
+              <option value="">Todos los tipos</option>
+              {propertyTypes.map((t) => (
+                <option key={t.id} value={t.name}>
+                  {t.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
+          <div className="search-bar__filter">
+            <label className="search-bar__label">
+              <span>Categoría</span>
+            </label>
+            <select
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="search-bar__select"
+            >
+              <option value="">Venta o Arriendo</option>
+              <option value="Venta">Venta</option>
+              <option value="Arriendo">Arriendo</option>
+            </select>
+          
+          </div>
+            <div className="search-bar__actions">
+              {hasFilters && (
+                <button
+                  type="button"
+                  onClick={handleClear}
+                  className="search-bar__button search-bar__button--secondary"
+                >
+                  Limpiar
+                </button>
+              )}
+              <button
+                type="submit"
+                className="search-bar__button search-bar__button--primary"
+                disabled={!hasFilters}
+              >
+                Buscar
+              </button>
+            </div>
         </div>
-        <button className="search-bar__button" type="submit" aria-label="Buscar propiedades">
-          <span>Buscar</span>
-        </button>
       </form>
     );
   }
-
-  // Variant compacto para otros lugares
-  return (
-    <form className="search-bar search-bar--compact" onSubmit={onSubmit}>
-      <input
-        className="search-bar__input search-bar__input--compact"
-        type="text"
-        placeholder="Buscar..."
-        value={query}
-        onChange={(e) => setQuery(e.target.value)}
-        aria-label="Buscar propiedades"
-      />
-      <button className="search-bar__button search-bar__button--compact" type="submit" aria-label="Buscar">
-        <Search size={18} />
-      </button>
-    </form>
-  );
 };
 
 export default SearchBar;

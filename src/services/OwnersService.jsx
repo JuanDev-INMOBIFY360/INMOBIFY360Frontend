@@ -5,7 +5,7 @@ export const getOwners = async () => {
     const res = await api.get('/api/owners');
     return res.data.data;
   } catch (err) {
-    console.error('❌ Error fetching owners:', err);
+    console.error('Error fetching owners:', err);
     throw err;
   }
 };

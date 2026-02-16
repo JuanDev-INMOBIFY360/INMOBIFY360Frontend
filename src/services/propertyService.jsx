@@ -8,7 +8,7 @@ export const getProperties = async (params = {}) => {
     const res = await api.get('/api/properties/public/list', { params });
     return res.data.data || res.data;
   } catch (err) {
-    console.error('❌ Error fetching properties:', err);
+    console.error('Error fetching properties:', err);
     throw err;
   }
 };
@@ -21,7 +21,7 @@ export const getProperty = async (id) => {
     const res = await api.get(`/api/properties/public/${id}`);
     return res.data.data || res.data;
   } catch (err) {
-    console.error('❌ Error fetching property:', err);
+    console.error('Error fetching property:', err);
     throw err;
   }
 };

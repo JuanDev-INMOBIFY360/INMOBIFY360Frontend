@@ -5,7 +5,7 @@ export const getRoles = async () => {
     const res = await api.get('/api/roles');
     return res.data;
   } catch (err) {
-    console.error('❌ Error fetching roles:', err);
+    console.error('Error fetching roles:', err);
     throw err;
   }
 };

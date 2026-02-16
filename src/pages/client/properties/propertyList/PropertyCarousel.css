@@ -26,6 +26,7 @@
 .header-property-carousel-client {
   text-align: center;
   margin-bottom: 10px;
+  margin-top: 20px;
   animation: fadeInDown 0.8s ease-out;
 }
 
@@ -185,14 +186,23 @@
   height: 250px;
   overflow: hidden;
   background: var(--gray-light);
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  padding: 12px;
 }
 
 .image-property-client {
+  position: absolute;
+  top: 0;
+  left: 0;
   width: 100%;
   height: 100%;
+  display: block;
   object-fit: cover;
   transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
   will-change: transform;
+  z-index: 0;
 }
 
 .card-property-client:hover .image-property-client {
@@ -211,7 +221,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  z-index: 5;
+  z-index: 3;
 }
 
 .card-property-client:hover .image-overlay-property-client {
@@ -256,12 +266,10 @@
    BADGE STATUS
    ============================================ */
 .badge-property-client {
-  position: absolute;
-  top: 16px;
-  right: 16px;
+  position: relative;
   background: var(--black);
   color: var(--white);
-  padding: 8px 16px;
+  padding: 4px 8px;
   border-radius: 24px;
   font-size: 0.625rem;
   font-weight: 700;
@@ -272,6 +280,8 @@
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   z-index: 6;
   text-transform: uppercase;
+  order: 2;
+  height: fit-content;
 }
 
 .badge-property-client:hover {
@@ -283,6 +293,29 @@
 
 .badge-property-client:active {
   transform: scale(0.98);
+}
+
+.property-city-overlay-client {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  background: rgba(0, 0, 0, 0.7);
+  color: var(--white);
+  padding: 6px 10px;
+  border-radius: 4px;
+  font-size: 0.625rem;
+  font-weight: 600;
+  z-index: 5;
+  order: 1;
+  height: fit-content;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 120px;
+}
+
+.property-city-overlay-client svg {
+  flex-shrink: 0;
 }
 
 /* ============================================
@@ -682,9 +715,7 @@
 
   .badge-property-client {
     font-size: 0.5625rem;
-    padding: 6px 12px;
-    top: 12px;
-    right: 12px;
+    padding: 3px 6px;
   }
 
   .cta-btn-property-carousel-client {

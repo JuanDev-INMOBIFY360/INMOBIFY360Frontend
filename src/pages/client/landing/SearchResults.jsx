@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
-import { X, MapPin, Bed, Bath, Car, Ruler, Eye, Home, Tag, Info, ChevronDown } from 'lucide-react';
+import { X, MapPin, Bed, Bath, Car, Maximize2, Eye, Home, Tag, Info, ChevronDown } from 'lucide-react';
 import { getProperties } from '../../../services/propertyService';
 import { getCountries, getDepartments } from '../../../services/LocationsService';
 import { normalizeForSearch } from '../../../utils/removeAccents';
@@ -10,7 +10,7 @@ function useQuery() {
   return new URLSearchParams(useLocation().search);
 }
 
-// ✅ Helper para obtener ciudades y barrios únicos de las propiedades
+// Helper para obtener ciudades y barrios únicos de las propiedades
 const extractLocationsFromProperties = (properties) => {
   const cities = new Set();
   const neighborhoods = new Set();
@@ -76,7 +76,7 @@ const SearchResults = () => {
   // Estado para mostrar/ocultar filtros adicionales
   const [showAdvancedFilters, setShowAdvancedFilters] = useState(false);
 
-  // ✅ Cargar datos iniciales
+  // Cargar datos iniciales
   useEffect(() => {
     setLoading(true);
     Promise.all([
@@ -85,7 +85,7 @@ const SearchResults = () => {
     ])
       .then(async ([propsData, countriesData]) => {
         if (Array.isArray(propsData)) {
-          console.log('📦 Propiedades cargadas:', propsData.length, propsData.slice(0, 2));
+          console.log('Propiedades cargadas:', propsData.length, propsData.slice(0, 2));
           setAll(propsData);
           
           // Extraer ciudades y barrios de las propiedades
@@ -104,19 +104,19 @@ const SearchResults = () => {
               const deptData = await getDepartments(colombia.id);
               if (Array.isArray(deptData)) setDepartments(deptData);
             } catch (err) {
-              console.error('❌ Error cargando departamentos:', err);
+              console.error('Error cargando departamentos:', err);
             }
           }
         }
       })
       .catch((err) => {
-        console.error('❌ Error cargando datos:', err);
+        console.error('Error cargando datos:', err);
         setError(err.message || 'Error cargando datos');
       })
       .finally(() => setLoading(false));
   }, []);
 
-  // ✅ Opciones únicas para filtros
+  // Opciones únicas para filtros
   const options = useMemo(() => {
     return {
       categories: [...new Set(all.map(p => {
@@ -128,7 +128,7 @@ const SearchResults = () => {
     };
   }, [all]);
 
-  // ✅ Aplicar filtros
+  // Aplicar filtros
   useEffect(() => {
     const term = normalizeForSearch(q);
     const filtered = all.filter(p => {
@@ -196,7 +196,7 @@ const SearchResults = () => {
     setResults(filtered);
   }, [all, q, filters]);
 
-  // ✅ Limpiar todos los filtros
+  // Limpiar todos los filtros
   const clearFilters = () => {
     setFilters({
       category: '',
@@ -211,10 +211,10 @@ const SearchResults = () => {
     });
   };
 
-  // ✅ Filtros activos para mostrar badges
+  // Filtros activos para mostrar badges
   const activeFilters = Object.entries(filters).filter(([_, v]) => v);
 
-  // ✅ Ciudades filtradas por departamento
+  // Ciudades filtradas por departamento
   const filteredCities = useMemo(() => {
     if (!filters.department) return cities;
     const dept = departments.find(d => d.name === filters.department);
@@ -222,7 +222,7 @@ const SearchResults = () => {
     return cities.filter(c => c.departmentId === dept.id);
   }, [filters.department, cities, departments]);
 
-  // ✅ Barrios filtrados por ciudad
+  // Barrios filtrados por ciudad
   const filteredNeighborhoods = useMemo(() => {
     if (!filters.city) return neighborhoods;
     const city = cities.find(c => c.name === filters.city);
@@ -231,7 +231,7 @@ const SearchResults = () => {
   }, [filters.city, neighborhoods, cities]);
 
   const handleViewProperty = (id) => {
-    console.log('🔗 Navigating to property:', id);
+    console.log('Navigating to property:', id);
     navigate(`/properties/${id}`);
   };
 
@@ -454,38 +454,38 @@ const SearchResults = () => {
                         }}
                         onLoad={() => {}}
                       />
-                      <span className="property-badge">{p.estado || 'Usado'}</span>
+                      <p className="property-location-overlay">
+                        <MapPin size={12} /> {p.ciudad || p.city?.name}
+                      </p>
+                      {/* Badge tipo propiedad */}
+                      <span className="property-type-badge-image">{p.typeProperty?.name?.toUpperCase() || 'PROPIEDAD'} | DISPONIBLE</span>
                     </div>
                     <div className="property-content">
-                      <h3 className="property-title">{p.titulo || p.typeProperty?.name || 'Propiedad'}</h3>
-                      <p className="property-location-a">
-                        <MapPin size={14} /> {p.ciudad || p.city?.name}
-                      </p>
-                      <div className="property-specs">
-                        <div className="spec">
-                          <Ruler size={16} />
-                          <span>{p.areaConstruida || 0}m²</span>
+                      {/* Company Tag */}
+                      <div className="company-tag-property">
+                        <div className="company-icon-property">
+                          <Home size={11} />
                         </div>
-                        <div className="spec">
-                          <Bed size={16} />
-                          <span>{p.habitaciones || 0}</span>
-                        </div>
-                        <div className="spec">
-                          <Bath size={16} />
-                          <span>{p.banos || 0}</span>
-                        </div>
-                        <div className="spec">
-                          <Car size={16} />
-                          <span>{p.parqueaderos || 0}</span>
-                        </div>
+                        <span className="company-name-property">Inmobify360</span>
+                        <span className="company-status-property">| {p.operacion === 'SALE' ? 'Venta' : 'Alquiler'}</span>
                       </div>
-                      <p className="property-price">{formatPrice(p.precio)}</p>
-                      <button 
-                        className="property-btn" 
-                        onClick={() => handleViewProperty(p.id)}
-                      >
-                        Ver detalle
-                      </button>
+
+                      <h3 className="property-title">{p.titulo || p.typeProperty?.name || 'Propiedad'}</h3>
+                      
+                      {/* Features Inline */}
+                      <div className="property-features-inline">
+                        {p.areaConstruida > 0 && <span>{p.areaConstruida}m² |</span>}
+                        {p.habitaciones > 0 && <span>{p.habitaciones} hab |</span>}
+                        {p.banos > 0 && <span>{p.banos} baños |</span>}
+                        {p.parqueaderos > 0 && <span>{p.parqueaderos}</span>}
+                      </div>
+
+                      <div className="property-footer-search">
+                        <p className="property-price">{formatPrice(p.precio)}</p>
+                        <span className={`property-type-badge ${p.operacion === 'SALE' ? 'venta' : 'renta'}`}>
+                          {p.operacion === 'SALE' ? 'VENTA' : 'RENTA'}
+                        </span>
+                      </div>
                     </div>
                   </article>
                 );

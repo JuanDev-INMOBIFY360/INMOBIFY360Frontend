@@ -8,6 +8,8 @@ import videocasa from "../../../assets/videocasa.mp4";
 
 export default function Home() {
   const [query, setQuery] = useState("");
+  const [cities, setCities] = useState([]);
+  const [types, setTypes] = useState([]);
 
   useEffect(() => {
     api.get("/")
@@ -17,6 +19,21 @@ export default function Home() {
       .catch((err) => {
         console.error(" API disponible pero sin respuesta de verificación →", err);
       });
+
+    // load property types for select
+    import("../../../services/TypesService.jsx").then(({ getTypes }) => {
+      getTypes().then(setTypes).catch(console.error);
+    });
+
+    // load some properties to extract cities (first batch)
+    import("../../../services/propertyService.jsx").then(({ getProperties }) => {
+      getProperties({ limit: 50 })
+        .then((data) => {
+          const unique = [...new Set(data.map((p) => p.ciudad).filter(Boolean))];
+          setCities(unique);
+        })
+        .catch(console.error);
+    });
   }, []);
   
   return (
@@ -47,7 +64,12 @@ export default function Home() {
         </div>
         
         <div className="search-box">
-          <SearchBar initialValue={query} variant="hero" />
+          <SearchBar
+            initialValue={query}
+            variant="hero"
+            cities={cities}
+            propertyTypes={types}
+          />
         </div>
       </header>
 

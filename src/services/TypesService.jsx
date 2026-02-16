@@ -5,7 +5,7 @@ export const getTypes = async () => {
     const res = await api.get('/api/types');
     return res.data.data || res.data;
   } catch (err) {
-    console.error('❌ Error fetching types:', err);
+    console.error('Error fetching types:', err);
     throw err;
   }
 };

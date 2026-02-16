@@ -24,7 +24,7 @@ export const parseImages = (images) => {
     
     return [];
   } catch (error) {
-    console.error('❌ Error parsing images:', error);
+    console.error('Error parsing images:', error);
     return [];
   }
 };

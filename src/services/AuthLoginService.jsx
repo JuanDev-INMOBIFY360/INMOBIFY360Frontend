@@ -5,7 +5,7 @@ export const loginUser = async (credentials) => {
     const response = await api.post("/api/auth/login", credentials);
     return response.data;
     } catch (error) {
-    console.error("❌ Error logging in:", error);
+    console.error("Error logging in:", error);
     throw error;
   }
 };
@@ -19,7 +19,7 @@ export const profileUser = async (token) => {
     return response.data;
     }
     catch (error) {
-    console.error("❌ Error fetching profile:", error);
+    console.error("Error fetching profile:", error);
     throw error;
   }
 };
@@ -34,7 +34,7 @@ export const updateProfileUser = async (token, profileData) => {
     return response.data;
     }
     catch (error) {
-    console.error("❌ Error updating profile:", error);
+    console.error("Error updating profile:", error);
     throw error;
   }
 };
@@ -48,7 +48,7 @@ export const logoutUser = async (token) => {
         });
         return response.data;
     } catch (error) {
-        console.error("❌ Error logging out:", error);
+        console.error("Error logging out:", error);
         throw error;
     }
 };
