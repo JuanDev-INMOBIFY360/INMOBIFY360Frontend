@@ -1,7 +1,7 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../../context/AuthContext';
-import Logo from '../../../assets/Logo.png';
+import BackgroundImage from '../../../assets/fondo-login.jpeg';
 import axios from 'axios';
 import { Eye, EyeOff, Lock, Mail, AlertCircle } from 'lucide-react';
 import './login.css';
@@ -13,8 +13,15 @@ export default function AuthLogin() {
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
   
-  const { login } = useContext(AuthContext);
+  const { login, user, loading: authLoading } = useContext(AuthContext);
   const navigate = useNavigate();
+
+  // Redirigir al admin si ya está logueado
+  useEffect(() => {
+    if (!authLoading && user) {
+      navigate('/admin');
+    }
+  }, [user, authLoading, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -39,87 +46,89 @@ export default function AuthLogin() {
 
   return (
     <div className="login-container">
-      <div className="login-card">
-        <div className="login-header">
-          <div className="login-icon">
-            <Lock size={32} />
+      {/* Sección de la imagen */}
+      <div className="login-image-section">
+        <img src={BackgroundImage} alt="Fondo INMOBIFY360" className="login-background-image" />
+        <div className="login-image-overlay"></div>
+      </div>
+
+      {/* Sección del formulario */}
+      <div className="login-form-section">
+        <div className="login-card">
+          <div className="login-header">
+            <h1 className="login-title">INMOBIFY360</h1>
+            <p className="login-subtitle">Panel Administrativo</p>
           </div>
-          <div className="login-brand">
-            <img src={Logo} alt="INMOBIFY360" className="login-logo" />
-            <div>
-              <h1 className="login-title">Iniciar sesión</h1>
-              <p className="login-subtitle">Panel administrativo</p>
+
+          {error && (
+            <div className="error-alert">
+              <AlertCircle size={20} />
+              <span>{error}</span>
             </div>
-          </div>
-        </div>
+          )}
 
-        {error && (
-          <div className="error-alert">
-            <AlertCircle size={20} />
-            <span>{error}</span>
-          </div>
-        )}
-
-        <form onSubmit={handleSubmit} className="login-form">
-          <div className="form-group">
-            <label htmlFor="email" className="form-label">
-              <Mail size={18} />
-              Correo Electrónico
-            </label>
-            <input
-              id="email"
-              type="email"
-              className="form-input"
-              placeholder="admin@inmobify360.com"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              required
-              disabled={loading}
-            />
-          </div>
-
-          <div className="form-group">
-            <label htmlFor="password" className="form-label">
-              <Lock size={18} />
-              Contraseña
-            </label>
-            <div className="password-input-wrapper">
+          <form onSubmit={handleSubmit} className="login-form">
+            <div className="form-group">
+              <label htmlFor="email" className="form-label">
+            
+                <span>Correo Electrónico</span>
+              </label>
               <input
-                id="password"
-                type={showPassword ? 'text' : 'password'}
+                id="email"
+                type="email"
                 className="form-input"
-                placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
+                placeholder="admin@inmobify360.com"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
                 required
                 disabled={loading}
               />
-              <button
-                type="button"
-                className="password-toggle"
-                onClick={() => setShowPassword(!showPassword)}
-                disabled={loading}
-              >
-                {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-              </button>
             </div>
+
+            <div className="form-group">
+              <label htmlFor="password" className="form-label">
+               
+                <span>Contraseña</span>
+              </label>
+              <div className="password-input-wrapper">
+                <input
+                  id="password"
+                  type={showPassword ? 'text' : 'password'}
+                  className="form-input"
+                  placeholder="••••••••"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  required
+                  disabled={loading}
+                />
+                <button
+                  type="button"
+                  className="password-toggle"
+                  onClick={() => setShowPassword(!showPassword)}
+                  disabled={loading}
+                  title={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
+                >
+                  {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                </button>
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              className="submit-button"
+              disabled={loading}
+            >
+              {loading ? (
+                <div className="spinner"></div>
+              ) : (
+                'Iniciar Sesión'
+              )}
+            </button>
+          </form>
+
+          <div className="login-footer">
+            <a href="/" className="back-link">← Volver al inicio</a>
           </div>
-
-          <button
-            type="submit"
-            className="submit-button"
-            disabled={loading}
-          >
-            {loading ? (
-              <div className="spinner"></div>
-            ) : (
-              'Iniciar Sesión'
-            )}
-          </button>
-        </form>
-
-        <div className="login-footer">
-          <a href="/" className="back-link">← Volver al inicio</a>
         </div>
       </div>
     </div>

@@ -502,6 +502,7 @@
   transition: var(--transition-base);
   text-transform: uppercase;
   letter-spacing: 1px;
+  top: -20px;
 }
 
 .cta-btn-property-carousel-client::before {

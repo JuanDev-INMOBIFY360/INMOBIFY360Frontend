@@ -24,28 +24,18 @@ const MENU_CONFIG = [
   {
     id: "propiedades",
     label: "Propiedades",
+    href: "/search",
     dropdown: [
-      { label: "Comprar", href: "/comprar", icon: <Home size={18} /> },
-      { label: "Arrendar", href: "/arrendar", icon: <Key size={18} /> },
-      {
-        label: "Proyectos Nuevos",
-        href: "/proyectos",
-        icon: <Building2 size={18} />,
-      },
-      { label: "Comercial", href: "/comercial", icon: <Building size={18} /> },
+      { label: "Venta", href: "/search?category=Venta", icon: <Home size={18} /> },
+      { label: "Arriendo", href: "/search?category=Arriendo", icon: <Key size={18} /> },
     ],
   },
   {
     id: "servicios",
     label: "Servicios",
     dropdown: [
-      { label: "Avalúos", href: "/avaluos", icon: <BarChart3 size={18} /> },
-      { label: "Asesoría Legal", href: "/legal", icon: <Scale size={18} /> },
-      {
-        label: "Financiamiento",
-        href: "/financiamiento",
-        icon: <CircleDollarSign size={18} />,
-      },
+      { label: "Asesoría Legal", href: "/faq", icon: <Scale size={18} /> },
+   
       {
         label: "Administración",
         href: "/administracion",
@@ -61,7 +51,7 @@ const MENU_CONFIG = [
   {
     id: "contacto",
     label: "Contacto",
-    href: "/contacto",
+    href: "/faq",
   },
 ];
 

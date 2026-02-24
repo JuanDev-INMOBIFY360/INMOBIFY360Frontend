@@ -19,6 +19,7 @@ import PublicLayout from "./layaouts/PublicLayout";
 import Home from "./pages/client/landing/home";
 import PropertyDetail from "./pages/client/properties/detailsProperties/PropertyDetails";
 import SearchResults from "./pages/client/landing/SearchResults";
+import FAQ from "./pages/client/landing/FAQ";
 
 function PropertyDetailWrapper() {
   return <PropertyDetail />;
@@ -35,6 +36,7 @@ function App() {
             <Route path="/" element={<Home />} />
             <Route path="/properties/:id" element={<PropertyDetailWrapper />} />
             <Route path="/search" element={<SearchResults />} />
+            <Route path="/faq" element={<FAQ />} />
           </Route>
 
           {/* ================= AUTH ================= */}

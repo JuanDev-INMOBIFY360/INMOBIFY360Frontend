@@ -240,6 +240,8 @@ const SearchResults = () => {
 
   return (
     <main className="search-results-page">
+    
+
       <div className="search-results-container">
         {/* Sidebar de Filtros */}
         <aside className="search-sidebar">
@@ -470,14 +472,14 @@ const SearchResults = () => {
                         <span className="company-status-property">| {p.operacion === 'SALE' ? 'Venta' : 'Alquiler'}</span>
                       </div>
 
-                      <h3 className="property-title">{p.titulo || p.typeProperty?.name || 'Propiedad'}</h3>
+                      <h3 className="property-title-search">{p.titulo || p.typeProperty?.name || 'Propiedad'}</h3>
                       
                       {/* Features Inline */}
-                      <div className="property-features-inline">
-                        {p.areaConstruida > 0 && <span>{p.areaConstruida}m² |</span>}
-                        {p.habitaciones > 0 && <span>{p.habitaciones} hab |</span>}
-                        {p.banos > 0 && <span>{p.banos} baños |</span>}
-                        {p.parqueaderos > 0 && <span>{p.parqueaderos}</span>}
+                      <div className="search-property-features">
+                        {p.areaConstruida > 0 && <span><Maximize2 size={12} className="search-property-icon" /> {p.areaConstruida}m²</span>}
+                        {p.habitaciones > 0 && <span><Bed size={12} className="search-property-icon" /> {p.habitaciones}</span>}
+                        {p.banos > 0 && <span><Bath size={12} className="search-property-icon" /> {p.banos}</span>}
+                        {p.parqueaderos > 0 && <span><Car size={12} className="search-property-icon" />{p.parqueaderos}</span>}
                       </div>
 
                       <div className="property-footer-search">
@@ -486,6 +488,14 @@ const SearchResults = () => {
                           {p.operacion === 'SALE' ? 'VENTA' : 'RENTA'}
                         </span>
                       </div>
+
+                      {/* Ver Detalles Button */}
+                      <button 
+                        className="property-details-btn"
+                        onClick={() => handleViewProperty(p.id)}
+                      >
+                        <Eye size={16} /> Ver Detalles
+                      </button>
                     </div>
                   </article>
                 );

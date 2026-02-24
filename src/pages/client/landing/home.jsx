@@ -4,6 +4,9 @@ import "./homeStyles.css"
 import PropertyList from "../properties/propertyList/PropertyList";
 import SearchBar from '../../../components/SearchBar/';
 import videocasa from "../../../assets/videocasa.mp4"; 
+import imagenIA from "../../../assets/IA.jpg"
+import Nosotros from "./Nosotros";
+import Footer from "./Footer";
 
 
 export default function Home() {
@@ -73,10 +76,59 @@ export default function Home() {
         </div>
       </header>
 
-      {/* ===== PROPERTIES SECTION ===== */}
-      <main className="home-section properties-section">
-        <PropertyList />
-      </main>
+    <main>
+
+  <section className="properties-section">
+    <PropertyList />
+  </section>
+
+  <section className="ia-section">
+    <div className="ia-layout">
+
+      <div className="ia-content">
+        <header className="ia-header">
+          <h2>Próximamente: Tu Asistente Inmobiliario</h2>
+          <p>
+            Responde con precisión, agenda citas y aprende de tus preferencias.
+          </p>
+        </header>
+
+        <div className="ia-cards">
+          <div className="ia-card">
+            <h3>Respuestas acertivas</h3>
+            <p>El asistente entiende tus gustos y ofrece respuestas personalizadas.</p>
+          </div>
+
+          <div className="ia-card">
+            <h3>Agendación automática</h3>
+            <p>Organiza visitas según tu disponibilidad sin esfuerzo.</p>
+          </div>
+
+          <div className="ia-card">
+            <h3>Preferencias inteligentes</h3>
+            <p>Aprende de tus elecciones para sugerir mejores opciones.</p>
+          </div>
+        </div>
+      </div>
+
+      <figure className="ia-image">
+        <img
+          src={imagenIA}
+          alt="Asistente inmobiliario impulsado por inteligencia artificial"
+        />
+      </figure>
+
+    </div>
+  </section>
+
+  {/* secciones adicionales */}
+  <Nosotros />
+  <Footer />
+
+</main>
+
+      
+
     </>
   );
 }
