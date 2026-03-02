@@ -1,12 +1,8 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Home,
   Key,
-  Building2,
-  Building,
-  BarChart3,
   Scale,
-  CircleDollarSign,
   ClipboardList,
   ChevronDown,
   HelpCircle,
@@ -46,7 +42,7 @@ const MENU_CONFIG = [
   {
     id: "nosotros",
     label: "Nosotros",
-    href: "/nosotros",
+    href: "#nosotros-section",
   },
   {
     id: "contacto",
@@ -57,48 +53,76 @@ const MENU_CONFIG = [
 
 const Navbar = () => {
   const [activeDropdown, setActiveDropdown] = useState(null);
-  const [closeTimeout, setCloseTimeout] = useState(null);
+  const closeTimeoutRef = useRef(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  const handleScrollToSection = (href) => {
+    // Si es un ancla (nosotros), hacer scroll a esa sección
+    if (href === '#nosotros-section') {
+      const section = document.getElementById('nosotros-section');
+      if (section) {
+        section.scrollIntoView({ behavior: 'smooth' });
+        setMobileMenuOpen(false);
+      }
+    } else {
+      // Si no, navegar normalmente
+      window.location.href = href;
+      setMobileMenuOpen(false);
+    }
+  };
 
   useEffect(() => {
     document.body.classList.add("has-navbar");
     return () => {
       document.body.classList.remove("has-navbar");
       // Limpiar timeout al desmontar
-      if (closeTimeout) {
-        clearTimeout(closeTimeout);
+      if (closeTimeoutRef.current) {
+        clearTimeout(closeTimeoutRef.current);
       }
     };
-  }, [closeTimeout]);
+  }, []);
+
+  useEffect(() => {
+    const handleClickOutside = (e) => {
+      if (mobileMenuOpen) {
+        const navbar = document.querySelector('.navbar');
+        if (!navbar?.contains(e.target)) {
+          setMobileMenuOpen(false);
+        }
+      }
+    };
+
+    document.addEventListener('click', handleClickOutside);
+    return () => document.removeEventListener('click', handleClickOutside);
+  }, [mobileMenuOpen]);
 
   const handleMouseEnter = (itemId) => {
     // Cancelar cualquier cierre pendiente
-    if (closeTimeout) {
-      clearTimeout(closeTimeout);
-      setCloseTimeout(null);
+    if (closeTimeoutRef.current) {
+      clearTimeout(closeTimeoutRef.current);
     }
     setActiveDropdown(itemId);
   };
 
   const handleMouseLeave = () => {
     // Agregar un pequeño delay antes de cerrar (200ms)
-    const timeout = setTimeout(() => {
+    closeTimeoutRef.current = setTimeout(() => {
       setActiveDropdown(null);
     }, 200);
-    setCloseTimeout(timeout);
   };
 
   return (
     <header className="navbar" role="banner">
       <nav className="navbar-container" aria-label="Menú principal">
         {/* LOGO IZQUIERDA */}
-        <div className="logo">
+        <div className="logo" onClick={() => setMobileMenuOpen(false)}>
           <a href="/" aria-label="Ir a inicio - Inmobify360">
             <img src={logos} alt="Logo Inmobify360" className="image-logo" />
           </a>
         </div>
 
         {/* MENÚ CENTRAL */}
-        <ul className="nav-menu center-menu" role="menubar">
+        <ul className={`nav-menu center-menu ${mobileMenuOpen ? 'mobile-open' : ''}`} role="menubar">
           {MENU_CONFIG.map((item) => {
             const hasDropdown = item.dropdown && item.dropdown.length > 0;
             const isActive = activeDropdown === item.id;
@@ -107,8 +131,11 @@ const Navbar = () => {
               <li
                 key={item.id}
                 className="nav-item"
-                onMouseEnter={() => hasDropdown && handleMouseEnter(item.id)}
-                onMouseLeave={() => hasDropdown && handleMouseLeave()}
+                onClick={() => {
+                  if (hasDropdown && mobileMenuOpen) {
+                    setActiveDropdown(activeDropdown === item.id ? null : item.id);
+                  }
+                }}
                 role="none"
               >
                 {hasDropdown ? (
@@ -119,6 +146,13 @@ const Navbar = () => {
                       aria-haspopup="true"
                       aria-expanded={isActive}
                       aria-label={`${item.label} - Submenú`}
+                      onMouseEnter={() => handleMouseEnter(item.id)}
+                      onMouseLeave={() => handleMouseLeave()}
+                      onClick={(e) => {
+                        if (mobileMenuOpen) {
+                          e.preventDefault();
+                        }
+                      }}
                     >
                       {item.label}
                       <ChevronDown
@@ -129,13 +163,26 @@ const Navbar = () => {
                     </button>
                     
                     {isActive && (
-                      <div className="dropdown" role="menu">
+                      <div
+                        className="dropdown"
+                        role="menu"
+                        onMouseEnter={() => {
+                          if (closeTimeoutRef.current) {
+                            clearTimeout(closeTimeoutRef.current);
+                          }
+                        }}
+                        onMouseLeave={() => handleMouseLeave()}
+                      >
                         {item.dropdown.map((sub, i) => (
                           <a 
                             key={i} 
                             href={sub.href} 
                             className="dropdown-item"
                             role="menuitem"
+                            onClick={() => {
+                              setActiveDropdown(null);
+                              setMobileMenuOpen(false);
+                            }}
                           >
                             <span aria-hidden="true">{sub.icon}</span>
                             <span>{sub.label}</span>
@@ -148,6 +195,14 @@ const Navbar = () => {
                   <a 
                     className="nav-link" 
                     href={item.href}
+                    onClick={(e) => {
+                      if (item.href.startsWith('#')) {
+                        e.preventDefault();
+                        handleScrollToSection(item.href);
+                      } else {
+                        setMobileMenuOpen(false);
+                      }
+                    }}
                     role="menuitem"
                   >
                     {item.label}
@@ -158,12 +213,23 @@ const Navbar = () => {
           })}
         </ul>
 
-        {/* FAQ DERECHA */}
+        {/* FAQ DERECHA + MOBILE TOGGLE */}
         <nav className="faq-right" aria-label="Ayuda">
-          <a href="/faq" className="faq-link" aria-label="Ver preguntas frecuentes">
+          <a href="/faq" className="faq-link" aria-label="Ver preguntas frecuentes" onClick={() => setMobileMenuOpen(false)}>
             <HelpCircle size={18} aria-hidden="true" /> 
             <span>Preguntas frecuentes</span>
           </a>
+          
+          <button
+            className={`mobile-toggle ${mobileMenuOpen ? 'active' : ''}`}
+            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+            aria-label={mobileMenuOpen ? "Cerrar menú" : "Abrir menú"}
+            aria-expanded={mobileMenuOpen}
+          >
+            <span className="hamburger"></span>
+            <span className="hamburger"></span>
+            <span className="hamburger"></span>
+          </button>
         </nav>
       </nav>
     </header>

@@ -4,6 +4,7 @@ import {
   MapPin, Bed, Bath, Car, Maximize2, 
   Share2, Heart, ChevronLeft, ChevronRight, MessageCircle
 } from 'lucide-react';
+import { RiWhatsappLine } from 'react-icons/ri';
 import { getProperty } from '../../../../services/propertyService';
 import './PropertyDetail.css';
 
@@ -433,9 +434,10 @@ const PropertyDetail = () => {
                 <button 
                   className="whatsapp-button"
                   onClick={handleOpenWhatsApp}
+                  title="Contactar por WhatsApp"
                 >
-                  <MessageCircle size={20} />
-                  Enviar WhatsApp
+                  <RiWhatsappLine size={20} />
+                  Enviar por WhatsApp
                 </button>
                 
                 <p className="availability">Disponible Lunes - Domingo</p>

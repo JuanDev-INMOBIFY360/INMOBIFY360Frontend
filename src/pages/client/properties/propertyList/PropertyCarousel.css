@@ -600,6 +600,11 @@
     padding: 0 50px;
   }
 
+  .card-property-client {
+    width: calc(50% - 12px);
+    margin-right: 8px;
+  }
+
   .nav-btn-property-carousel-client {
     width: 44px;
     height: 44px;
@@ -643,6 +648,11 @@
 
   .wrapper-property-carousel-client {
     padding: 0 40px;
+  }
+
+  .card-property-client {
+    width: 100%;
+    margin-right: 0;
   }
 
   .nav-btn-property-carousel-client {
