@@ -3,8 +3,6 @@ import api from "../../../services/api";
 import "./homeStyles.css"
 import PropertyList from "../properties/propertyList/PropertyList";
 import SearchBar from '../../../components/SearchBar/';
-import videocasa from "../../../assets/videocasa.mp4"; 
-import imagenIA from "../../../assets/IA.jpg"
 import Nosotros from "./Nosotros";
 import Footer from "./Footer";
 
@@ -51,7 +49,7 @@ export default function Home() {
           muted 
           playsInline
         >
-          <source src={videocasa} type="video/mp4" />
+          <source src="https://res.cloudinary.com/dn5icerbm/video/upload/v1772549908/videocasa_zxk7tw.mp4" type="video/mp4" />
           Tu navegador no soporta videos HTML5.
         </video>
 
@@ -113,7 +111,7 @@ export default function Home() {
 
       <figure className="ia-image">
         <img
-          src={imagenIA}
+          src="https://res.cloudinary.com/dn5icerbm/image/upload/v1772549898/IA_johiyb.jpg"
           alt="Asistente inmobiliario impulsado por inteligencia artificial"
         />
       </figure>

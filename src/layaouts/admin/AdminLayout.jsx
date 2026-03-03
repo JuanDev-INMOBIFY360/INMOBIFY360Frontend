@@ -4,7 +4,6 @@ import { LogOut } from "lucide-react";
 import { AuthContext } from "../../context/AuthContext";
 import { ADMIN_MODULES, getVisibleModules } from "../../constants/moduleConfig";
 import "./admin.css";
-import Logo from "../../assets/Logo.png";
 
 const Sidebar = ({ onLogout, userModules }) => {
   const visibleModules = getVisibleModules(userModules);
@@ -13,7 +12,7 @@ const Sidebar = ({ onLogout, userModules }) => {
     <aside className="admin-sidebar">
       <div className="admin-brand">
         <div className="brand-wrap">
-          <img src={Logo} alt="INMOBIFY360" />
+          <img src="https://res.cloudinary.com/dn5icerbm/image/upload/v1772549899/Logo_c7bywe.png" alt="INMOBIFY360" />
           <div className="brand-text">INMOBIFY360</div>
         </div>
       </div>

@@ -7,8 +7,6 @@ import {
   ChevronDown,
   HelpCircle,
 } from "lucide-react";
-
-import logos from "../../assets/Logos.png";
 import "./navbarPublic.css";
 
 const MENU_CONFIG = [
@@ -117,7 +115,7 @@ const Navbar = () => {
         {/* LOGO IZQUIERDA */}
         <div className="logo" onClick={() => setMobileMenuOpen(false)}>
           <a href="/" aria-label="Ir a inicio - Inmobify360">
-            <img src={logos} alt="Logo Inmobify360" className="image-logo" />
+            <img  src="https://res.cloudinary.com/dn5icerbm/image/upload/v1772549900/logos_qesvqh.png"  alt="Logo Inmobify360" className="image-logo" />
           </a>
         </div>
 

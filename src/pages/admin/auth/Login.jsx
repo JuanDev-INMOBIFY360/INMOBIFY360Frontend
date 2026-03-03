@@ -1,7 +1,6 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../../context/AuthContext';
-import BackgroundImage from '../../../assets/fondo-login.jpeg';
 import axios from 'axios';
 import { Eye, EyeOff, Lock, Mail, AlertCircle } from 'lucide-react';
 import './login.css';
@@ -29,7 +28,7 @@ export default function AuthLogin() {
     setLoading(true);
 
     try {
-      const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000';
+      const API_URL = import.meta.env.VITE_API_URL;
       const response = await axios.post(`${API_URL}/api/auth/login`, {
         email,
         password
@@ -48,7 +47,7 @@ export default function AuthLogin() {
     <div className="login-container">
       {/* Sección de la imagen */}
       <div className="login-image-section">
-        <img src={BackgroundImage} alt="Fondo INMOBIFY360" className="login-background-image" />
+        <img src="https://res.cloudinary.com/dn5icerbm/image/upload/v1772549898/fondo-login_pqgdv8.jpg" alt="Fondo INMOBIFY360" className="login-background-image" />
         <div className="login-image-overlay"></div>
       </div>
 
