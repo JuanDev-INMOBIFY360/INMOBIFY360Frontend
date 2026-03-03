@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { getRole} from "../../../../services/RolesService";
-import { getPermissions } from "../../../../services/permissionsService";
-import { getPrivileges } from "../../../../services/privilegesService";
+import { getPermissions } from "../../../../services/PermissionsService";
+import { getPrivileges } from "../../../../services/PrivilegesService";
 import "../../GlobalStyles/globalStyles.css";
 
 export default function FormRoles({ isOpen, onClose, roleToEdit, onSave }) {
