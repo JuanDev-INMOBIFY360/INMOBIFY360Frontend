@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../../context/AuthContext';
 import axios from 'axios';
 import { Eye, EyeOff, Lock, Mail, AlertCircle } from 'lucide-react';
-import './login.css';
+import './Login.css';
 
 export default function AuthLogin() {
   const [email, setEmail] = useState('');
