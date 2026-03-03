@@ -93,7 +93,7 @@ export default function Home() {
 
         <div className="ia-cards">
           <div className="ia-card">
-            <h3>Respuestas acertivas</h3>
+            <h3>Respuestas asertivas</h3>
             <p>El asistente entiende tus gustos y ofrece respuestas personalizadas.</p>
           </div>
 
