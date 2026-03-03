@@ -11,7 +11,7 @@ export default function CloudinaryWidget({ propertyId, onDone }) {
       const s = document.createElement('script');
       s.src = 'https://widget.cloudinary.com/v2.0/global/all.js';
       s.async = true;
-      s.onload = () => console.log('Cloudinary widget loaded');
+      s.onload = () => { if (import.meta.env.DEV) console.log('Cloudinary widget loaded'); };
       document.body.appendChild(s);
     }
   }, []);

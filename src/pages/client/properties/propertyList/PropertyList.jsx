@@ -27,7 +27,7 @@ const PropertyCarousel = () => {
   useEffect(() => {
     getProperties()
       .then((data) => {
-        console.log("Propiedades recibidas:", data);
+        if (import.meta.env.DEV) console.log("Propiedades recibidas:", data);
 
         const publishedProperties = Array.isArray(data)
           ? data.filter((prop) => prop.publicada !== false)
@@ -85,13 +85,13 @@ const PropertyCarousel = () => {
 
   // Navegación correcta a la ruta /properties/:id
   const handleViewMore = (propertyId) => {
-    console.log("Navegando a propiedad:", propertyId);
+    if (import.meta.env.DEV) console.log("Navegando a propiedad:", propertyId);
     navigate(`/properties/${propertyId}`);
   };
 
   // Búsqueda por tipo
   const handleSearchByType = (typeName) => {
-    console.log("Buscando por tipo:", typeName);
+    if (import.meta.env.DEV) console.log("Buscando por tipo:", typeName);
     navigate(`/search?type=${encodeURIComponent(typeName)}`);
   };
 

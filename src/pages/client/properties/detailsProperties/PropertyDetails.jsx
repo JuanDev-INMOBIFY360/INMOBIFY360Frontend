@@ -21,7 +21,7 @@ const PropertyDetail = () => {
   const WHATSAPP_NUMBER = '+57 302 6772851';
 
   useEffect(() => {
-    console.log('PropertyDetail montado con ID:', id);
+    if (import.meta.env.DEV) console.log('PropertyDetail montado con ID:', id);
     
     if (!id) {
       console.error('No hay id en los params');
@@ -31,9 +31,9 @@ const PropertyDetail = () => {
 
     const loadProperty = async () => {
       try {
-        console.log('Llamando a getProperty con ID:', id);
+        if (import.meta.env.DEV) console.log('Llamando a getProperty con ID:', id);
         const data = await getProperty(id);
-        console.log('Propiedad cargada:', data);
+        if (import.meta.env.DEV) console.log('Propiedad cargada:', data);
         
         if (!data) {
           console.error('getProperty retornó null o undefined');
@@ -57,12 +57,12 @@ const PropertyDetail = () => {
     if (!property) return [PLACEHOLDER_IMAGE];
     
     if (!property.images || !Array.isArray(property.images) || property.images.length === 0) {
-      console.log('No hay imágenes, usando placeholder');
+      if (import.meta.env.DEV) console.log('No hay imágenes, usando placeholder');
       return [PLACEHOLDER_IMAGE];
     }
     
     const urls = property.images.map(img => img.url || img).filter(Boolean);
-    console.log('URLs de imágenes:', urls);
+    if (import.meta.env.DEV) console.log('URLs de imágenes:', urls);
     return urls.length > 0 ? urls : [PLACEHOLDER_IMAGE];
   };
 

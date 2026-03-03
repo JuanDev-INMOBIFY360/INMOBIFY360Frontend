@@ -85,7 +85,7 @@ const SearchResults = () => {
     ])
       .then(async ([propsData, countriesData]) => {
         if (Array.isArray(propsData)) {
-          console.log('Propiedades cargadas:', propsData.length, propsData.slice(0, 2));
+          if (import.meta.env.DEV) console.log('Propiedades cargadas:', propsData.length, propsData.slice(0, 2));
           setAll(propsData);
           
           // Extraer ciudades y barrios de las propiedades
@@ -231,7 +231,7 @@ const SearchResults = () => {
   }, [filters.city, neighborhoods, cities]);
 
   const handleViewProperty = (id) => {
-    console.log('Navigating to property:', id);
+    if (import.meta.env.DEV) console.log('Navigating to property:', id);
     navigate(`/properties/${id}`);
   };
 

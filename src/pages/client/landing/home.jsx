@@ -15,7 +15,7 @@ export default function Home() {
   useEffect(() => {
     api.get("/")
       .then((res) => {
-        console.log("API conectada →", res.data);
+        if (import.meta.env.DEV) console.log("API conectada →", res.data);
       })
       .catch((err) => {
         console.error(" API disponible pero sin respuesta de verificación →", err);
