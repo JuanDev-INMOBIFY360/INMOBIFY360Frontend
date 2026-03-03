@@ -6,7 +6,7 @@ import './Footer.css';
 const Footer = () => {
   // Números y correos aleatorios (se pueden cambiar luego)
   const contactInfo = {
-    phone: '+57 314 8395860',
+    phone: '+57 302 6772851',
     email: 'contacto@inmobify360.com',
   };
 
@@ -15,7 +15,7 @@ const Footer = () => {
       id: 'whatsapp',
       label: 'WhatsApp',
       icon: RiWhatsappLine,
-      url: 'https://wa.me/573148395860',
+      url: 'https://wa.me/573026772851',
       color: '#25D366',
     },
     {

@@ -18,7 +18,7 @@ const PropertyDetail = () => {
   const PLACEHOLDER_IMAGE = 'data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 width=%221200%22 height=%22800%22%3E%3Crect fill=%22%23F8F8F8%22 width=%221200%22 height=%22800%22/%3E%3Ctext x=%2250%25%22 y=%2250%25%22 font-size=%2248%22 font-weight=%22600%22 fill=%22%23999999%22 text-anchor=%22middle%22 dy=%22.3em%22%3ESin imagen disponible%3C/text%3E%3C/svg%3E';
 
   // Número de WhatsApp para contacto
-  const WHATSAPP_NUMBER = '+57 314 8395860';
+  const WHATSAPP_NUMBER = '+57 302 6772851';
 
   useEffect(() => {
     console.log('PropertyDetail montado con ID:', id);
